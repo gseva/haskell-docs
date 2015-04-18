@@ -19,7 +19,7 @@
 
   git clone https://github.com/gibiansky/IHaskell
   cd IHaskell
-  # Es probable que falle, per lo cooro igual Para que instale todas las dependecias
+  \# Es probable que falle, per lo corro igual para que instale todas las dependecias
   ./ubuntu-setup.sh
   export PATH=~/.cabal/bin:$PATH
   cabal install happy cpphs
