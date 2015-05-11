@@ -1,16 +1,19 @@
 import System.IO
+import System.Random
 import Data.Char
 import Data.List(transpose)
 import Data.List.Split(chunksOf)
+import Control.Applicative
 import Control.Monad(when)
 
 
 inicial :: Int -> [[Int]]
-inicial x = take x $ repeat $ take x $ repeat 0
+inicial x = replicate x $ replicate x 0
 
+insertarRandom :: [Int] -> [Int]
 insertarRandom [] = []
 insertarRandom (x:xs)
-  | x == 0 = 2:xs
+  | x == 0 = 2:xs  -- Tremendo random
   | otherwise = x:insertarRandom xs
 
 insertar mapa = chunksOf 4 $ insertarRandom $ concat mapa
@@ -42,19 +45,30 @@ mover 'a' = moverIzquierda
 mover 'd' = moverDerecha
 mover c = id
 
+rellenar num = s ++ (replicate (5 - length s) ' ')
+  where s = show num
+
+completar = map rellenar
+
+separador = replicate (4 * 5) '-'
+
 imprimir mapa = do
   putStrLn ""
-  mapM print mapa
+  putStrLn $ separador
+  putStr $ unlines $ map unwords $ map completar mapa
 
-perdiste mapa = do
-  let puedeMover = not $ and $ zipWith (==) [moverArriba mapa, moverAbajo mapa, moverIzquierda mapa, moverDerecha mapa] (take 4 $ repeat mapa)
+condicionFin mapa = do
   if puedeMover then
     loop mapa
   else do
     imprimir mapa
     putStrLn "Perdiste!"
+  where
+    mapasIniciales = replicate 4 mapa
+    movimientosPosibles = [moverArriba, moverAbajo, moverIzquierda, moverDerecha] <*> [mapa]
+    puedeMover = not $ and $ zipWith (==) movimientosPosibles mapasIniciales
 
-insercion mapa = perdiste $ insertar mapa
+insercion mapa = condicionFin $ insertar mapa
 
 loop mapa = do
   imprimir mapa
