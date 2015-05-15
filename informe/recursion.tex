@@ -1,0 +1,86 @@
+\section{Recursión} % (fold)
+\label{sec:recursi_n}
+
+La recursión o recursividad es la forma de especificar una función basandose
+en su propia definición. Es una parte muy importante de Haskell. Una función
+es recursiva cuando una parte de su definición incluye a la propia función.
+Necesita por lo menos un \textit{caso base} que no hace llamado recursivo para
+que exista una condición límite.
+
+Este ejemplo muestra una función de factorial recursiva, separando
+claramente el caso base.
+
+\begin{lstlisting}
+  factorial 0 = 1
+  factorial n = n * factorial (n - 1)
+\end{lstlisting}
+
+Muchas de las funciones comunes en Haskell se pueden definir de forma
+recursiva, por ejemplo el \textit{length}, la función que devuelve el
+número de elementos de una lista:
+
+\begin{lstlisting}
+  length []     = 0
+  length (x:xs) = 1 + length xs
+\end{lstlisting}
+
+Recursión es usada para definir casi todas las funciones de manejo de números
+y listas, sin embargo en la práctica no es de usarse tan seguido: la
+recursividad está abstraida por las funciones de las librerias de Haskell,
+permitiendo al programador razonar sus problemas en más alto nivel. Por
+ejemplo, la función de factorial de ejemplo escrita anteriormente se puede
+definir de la siguiente manera:
+
+\begin{lstlisting}
+  factorial n = product [1..n]
+\end{lstlisting}
+
+% section recursi_n (end)
+
+
+\section{Pereza} % (fold)
+\label{sec:pereza}
+
+Una característica destacable de Haskell es que es \textit{perezoso} (o
+\textit{no estricto}). Esto significa que nada se va a evaluar hasta que sea
+directamente necesario - la evaluación queda diferida hasta que el resultado
+es requerido por otra computación.
+
+El siguiente es un ejemplo de la pereza de Haskell:
+
+\begin{lstlisting}
+  let (a, b) = (length [1..5], reverse "hola mundo") in 1 + 1
+\end{lstlisting}
+
+Como la expresión después del \textit{in} no utiliza los valores de a y b,
+estos quedan sin evaluar, ya que no son necesarios. Tambien pueden no ser
+necesarios por completo, o ser \textit{parcialmente} requeridos:
+
+\begin{lstlisting}
+  let (a, b) = (length [1..5], reverse "hola mundo")
+      'o':ss = b
+\end{lstlisting}
+
+Como solo es necesaria la primera letra para concluir el matcheo de
+patrones, la evaluación es parcial.
+
+Las funciones en Haskell pueden ser perezosas o estrictas. Podemos analizar
+si una función es perezosa o estricta pasandole \lstinline$undefined$ y viendo
+si su ejecución falla. Esto se debe a que en Haskell la evaluación forzada del
+\lstinline$undefined$ siempre termina en un error.
+
+\begin{lstlisting}
+  let (x, y) = undefined in x  -- Error!
+  length [undefined, undefined, undefined]
+  -- No hay error, length es perezoso
+\end{lstlisting}
+
+
+La evaluación perezosa tiene muchas ventajas, pero su mayor inconveniente es
+que el uso de memoria se vuelve muy dificil de predecir, por ejemplo las
+expresiones \lstinline$3+2 :: Int$ y \lstinline$5 :: Int$ denotan el mismo
+valor pero pueden tener diferentes tamaños en memoria.
+% \singlespace
+
+% \singlespace y
+% section pereza (end)
