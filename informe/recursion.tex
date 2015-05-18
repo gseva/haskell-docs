@@ -76,10 +76,12 @@ si su ejecución falla. Esto se debe a que en Haskell la evaluación forzada del
 \end{lstlisting}
 
 
-La evaluación perezosa tiene muchas ventajas, pero su mayor inconveniente es
-que el uso de memoria se vuelve muy dificil de predecir, por ejemplo las
-expresiones \lstinline$3+2 :: Int$ y \lstinline$5 :: Int$ denotan el mismo
-valor pero pueden tener diferentes tamaños en memoria.
+La evaluación perezosa tiene muchas ventajas, como la reutilización de código,
+posibilidad de generar estructuras de datos infinitas y definiciones
+circulares, pero su mayor inconveniente es que el uso de memoria se vuelve muy
+dificil de predecir, por ejemplo las expresiones \lstinline$3+2 :: Int$ y
+\lstinline$5 :: Int$ denotan el mismo valor pero pueden tener diferentes
+tamaños en memoria.
 % \singlespace
 
 % \singlespace y

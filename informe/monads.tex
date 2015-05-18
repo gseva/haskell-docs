@@ -1,0 +1,107 @@
+\section{Mónadas} % (fold)
+\label{sec:m_nadas}
+
+Las \textbf{mónadas} en Haskell se pueden pensar como descripciones
+\textit{componibles} de computaciones. Presentan la posibilidad de separar la
+combinación de computaciones de su ejecución y permiten acarrear datos extra
+implícitamente en adición al resultado de la computación, que
+\textit{se producirá} cuando la mónada sea corrida. De esta manera permiten
+suplementar las funcionalidades \textit{puras} con I/O, estado, indeterminismo,
+etc.
+
+En terminos del lenguaje una mónada es un tipo parametrizado que es instancia
+de la clase \textit{Monad}. Su definición es la siguiente:
+
+\begin{lstlisting}
+
+class Monad m where
+    return :: a -> m a
+    (>>=) :: m a -> (a -> m b) -> m b
+    (>>) :: m a -> m b -> m b
+
+\end{lstlisting}
+
+Podemos ver la mónada como un contenedor para un valor \textbf{a}. La función
+\lstinline$return$ se ocupa de poner ese valor adentro de la mónada. Entonces
+la función \lstinline$(>>=)$, tambien conocida como \textit{bind}, aplica la
+función que se le pasa por parámetro al contenido de la mónada obteniendo como
+resultado otra mónada (obviamente la función pasada tiene que tener el tipo
+adecuado). Se puede ver como funciona en el siguiente ejemplo:
+
+\begin{lstlisting}
+
+putStrLn "Como te llamas?"
+>>= (\_ -> getLine)
+>>= (\name -> putStrLn ("Hola, " ++ name ++ "!"))
+
+\end{lstlisting}
+
+El operador \lstinline$(>>=)$ se ocupa de tomar el valor del lado izquierdo
+y combinarlo con la función del lado derecho para producir un valor nuevo. El
+ejemplo de arriba se puede reescribir con la notación \lstinline$do$, que es un
+azucar sintáctico alrededor del operador \textit{bind}:
+
+\begin{lstlisting}
+
+do
+   putStrLn "Como te llamas?"
+   name <- getLine
+   putStrLn ("Hola, " ++ name ++ "!")
+
+\end{lstlisting}
+
+Ese código puede parecer de un lenguaje imperativo, y de hecho lo es: otra
+forma de ver las mónadas es pensar que son la abstracción necesaria para
+suplementar las funcionalidades que no cuadran adentro del paradigma funcional.
+
+La implementación mas sencilla del \lstinline$(>>=)$. toma el valor del lado
+izquierdo, le aplica la función y devuelve el resultado, sin embargo se vuelve
+realmente útil cuando esa implementación hace algo extra.
+
+\subsection{Las Leyes de las Mónadas} % (fold)
+\label{sub:las_leyes_de_las_m_nadas}
+
+Las mónadas por convención deben cumplir las siguientes leyes:
+
+\begin{lstlisting}
+  -- Identidad por la izquierda
+  return x >>= f = f x
+
+  -- Identidad por la derecha
+  m >>= return = m
+
+  -- Asociatividad
+  (m >>= f) >>= g = m >>= (x -> f x >>= g)
+\end{lstlisting}
+
+% subsection las_leyes_de_las_m_nadas (end)
+
+\subsection{Mónadas comunes} % (fold)
+\label{sub:m_nadas_comunes}
+
+La siguiente tabla lista las mónadas más comunes usadas en Haskell, denotando
+el problema que tratan de solucionar en términos imperativos.
+\linebreak
+\begin{tabular}{ | p {3cm} | p {5cm} |}
+  \hline
+  Mónada & Semántica imperativa \\
+  \hline
+  \hline
+  Maybe & Excepción anónima \\
+  \hline
+  Error & Excepción con descripción \\
+  \hline
+  State & Estado global \\
+  \hline
+  IO & Entrada y Salida \\
+  \hline
+  [] (list) & Indeterminismo \\
+  \hline
+  Reader & Entorno \\
+  \hline
+  Writer & Logger \\
+  \hline
+\end{tabular}
+% subsection m_nadas_comunes (end)
+
+% section m_nadas (end)
