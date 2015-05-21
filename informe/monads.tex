@@ -74,6 +74,30 @@ Las mónadas por convención deben cumplir las siguientes leyes:
   (m >>= f) >>= g = m >>= (x -> f x >>= g)
 \end{lstlisting}
 
+Para poder entenderlo mejor y usarlo de una forma más sencilla, el módulo
+Control.Monad define el operador de composición de mónadas:
+
+\begin{lstlisting}
+(>=>) :: Monad m => (a -> m b) -> (b -> m c) -> a -> m c
+(m >=> n) x = do
+                  y <- m x
+                  n y
+\end{lstlisting}
+
+Con el uso de ese operador las tres reglas pueden escribirse de la siguiente
+forma:
+
+\begin{lstlisting}
+  -- Identidad por la izquierda
+  return >=> f = f
+
+  -- Identidad por la derecha
+  f >=> return = f
+
+  -- Asociatividad
+  (f >=> g) >=> h = f >=> (g >=> h)
+\end{lstlisting}
+
 % subsection las_leyes_de_las_m_nadas (end)
 
 \subsection{Mónadas comunes} % (fold)
@@ -102,6 +126,131 @@ el problema que tratan de solucionar en términos imperativos.
   Writer & Logger \\
   \hline
 \end{tabular}
+
+En las siguientes secciones se explicarán algunas de las mónadas que aparecen
+en esta tabla.
 % subsection m_nadas_comunes (end)
+
+
+\subsection{Mónada Maybe} % (fold)
+\label{sub:m_nada_maybe}
+
+Es una de las mónadas más utilizadas y es muy sencilla a la vez. La definición
+de esta Mónada es la siguiente:
+
+\begin{lstlisting}
+data Maybe a = Nothing | Just a
+
+instance Monad Maybe where
+    return         = Just
+    fail           = Nothing
+    Nothing  >>= f = Nothing
+    (Just x) >>= f = f x
+\end{lstlisting}
+
+La mónada Maybe incorpora la posibilidad de encadenar computaciones que pueden
+devolver Nothing como resultado, en cuyo caso la cadena terminaría antes.
+
+\subsubsection{Either} % (fold)
+\label{ssub:either}
+
+
+Otra mónada muy usada es \textit{Either}. Su tipo está definido de la
+siguiente manera:
+
+\begin{lstlisting}
+  data Either a b = Left a | Right b
+\end{lstlisting}
+
+Su propósito es muy parecido al de Myabe, Left es considerado un error
+mientras que Right - un valor normal. La diferencia es que Left permite
+guardar un valor (a diferencia del Nothing en el caso de Maybe).
+% subsubsection _ither (end)
+% subsection m_nada_maybe (end)
+
+
+\subsection{Mónada Error} % (fold)
+\label{sub:m_nada_error}
+
+La mónada Error es la forma que tiene Haskell de simular las
+\textit{excepciones}. Se logra de la siguiente forma: se encadenan
+computaciones que pueden lanzar excepción derivando la ejecución a la
+instancia que puede manejarla.
+
+% subsection m_nada_error (end)
+
+
+\subsection{Mónada List} % (fold)
+\label{sub:m_nada_list}
+
+
+Resulta que la lista es una mónada tambien! Las listas se utilizan para modelar
+las computaciones no determinísticas que pueden devolver un número de
+resultados arbitrario. Se define de la siguiente manera:
+
+\begin{lstlisting}
+instance Monad [] where
+    m >>= f  = concat (map f m)
+    return x = [x]
+\end{lstlisting}
+
+El return es fácil de entender: simplemente devuelve una lista de un elemento.
+El operador \textit{bind} tambien se entiende si consideramos que tiene que
+cumplir con el tipo \lstinline$[a] -> (a -> [b]) -> [b]$ (por su defenición
+más general). La función \textbf{f} aplica a cada elemento y, dado su tipo,
+retorna una lista - por eso es necesario el \lstinline$concat$ al final, para
+a la salida obtener una lista.
+
+¿Por qué las listas son mónadas? Se explica con el siguiente ejemplo de
+notación monádica de una lista:
+
+\begin{lstlisting}
+foo = do
+  x <- [1 .. 10]
+  y <- [2, 3, 5, 7]
+  return (x * y)
+\end{lstlisting}
+
+\textbf{foo} es un múltiplo de x e y, con x siendo un número no determinístico
+entre 1 y 10, e y siendo 2, 3, 5 o 7. Este ejemplo es la notación larga y
+monádica de una comprensión de lista, podría ser escrita así:
+
+\begin{lstlisting}
+  foo = [x * y | x <- [1 .. 10], y <- [2, 3, 5, 7]]
+\end{lstlisting}
+% subsection m_nada_list (end)
+
+
+\subsection{Mónada IO} % (fold)
+
+Dado que Haskell es un lenguaje funcional y perezoso, no podemos expresar las
+efectos reales de las operaciones de entrada y salida con funciones puras. De
+hecho, estas operaciones no se pueden ejecutar perezosamente, ya que esto
+haria que los efectos reales sean impredecibles. La mónada \textbf{IO} es el
+medio para representar las acciones de entrada/salida como valores de Haskell,
+para que el programador pueda manipularlos con funciones puras.
+
+
+
+\subsection{Mónada State} % (fold)
+\label{sub:m_nada_state}
+
+
+
+\begin{lstlisting}
+  newtype State s a = State { runState :: (s -> (a,s)) }
+
+  instance Monad (State s) where
+    return x = State $ \s -> (x,s)
+    (State h) >>= f = State $ \s -> let (a, newState) = h s
+                                        (State g) = f a
+                                    in  g newState
+\end{lstlisting}
+
+% subsection m_nada_state (end)
+
+\label{sub:m_nada_io}
+
+% subsection m_nada_io (end)
 
 % section m_nadas (end)

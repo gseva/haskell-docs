@@ -26,7 +26,7 @@
   sudo apt-get install libncurses5-dev cpphs
   sudo ./build.sh ihaskell
   ihaskell install
-  
+
  - Ahora se le puede agregar el plugin para las presentaciones.
 
   git clone https://github.com/damianavila/RISE
@@ -37,7 +37,11 @@
 
   ipython notebook
 
-    
 
-  
+## Tips
+
+ *Insertar imágen*
+
+ `![caption](images/sara.png)`
+
 
