@@ -231,11 +231,17 @@ medio para representar las acciones de entrada/salida como valores de Haskell,
 para que el programador pueda manipularlos con funciones puras.
 
 
+\label{sub:m_nada_io}
+
+% subsection m_nada_io (end)
+
 
 \subsection{Mónada State} % (fold)
 \label{sub:m_nada_state}
 
-
+La mónada \textit{State} permite acarrear estado a lo largo de una ejecución.
+Con ella se puede hacer lo siguiente: dado un valor de estado, se produce un
+resultado y un nuevo valor de estado. Esta es su definición:
 
 \begin{lstlisting}
   newtype State s a = State { runState :: (s -> (a,s)) }
@@ -247,10 +253,48 @@ para que el programador pueda manipularlos con funciones puras.
                                     in  g newState
 \end{lstlisting}
 
+Como se ve en la declaración de tipo, State es solo una abstracción
+de una función que toma un estado, devuelve un valor intermedio y un nuevo
+estado.
+
+Un ejemplo de uso de State es una pila. La función \textbf{push}
+agrega un elemento al tope de la pila y \textbf{pop} saca uno. Sin State
+tendriamos que arrastrar la pila como argumento a estas funciones, lo cual
+no es lo más cómodo de usar. Con State la podemos definir de la siguiente
+forma:
+
+\begin{lstlisting}
+  type Stack = [Int]
+
+  pop :: State Stack Int
+  pop = State $ \(x:xs) -> (x,xs)
+
+  push :: Int -> State Stack ()
+  push a = State $ \xs -> ((),a:xs)
+
+\end{lstlisting}
+
+Un ejemplo de uso de la pila sería:
+
+\begin{lstlisting}
+  stackManip = do
+      push 3
+      a <- pop
+      pop
+\end{lstlisting}
+
+
+La implementación de State en Control.Monad también es instancia de la clase
+MonadState que define 2 funciones muy útiles:
+
+\begin{lstlisting}
+put newState = State $ \_ -> ((), newState)
+get = State $ \st -> (st, st)
+\end{lstlisting}
+
+Las cuales nos permiten manejar el estado de una manera más sencilla.
+
+
 % subsection m_nada_state (end)
-
-\label{sub:m_nada_io}
-
-% subsection m_nada_io (end)
 
 % section m_nadas (end)

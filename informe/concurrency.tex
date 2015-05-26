@@ -1,0 +1,34 @@
+
+
+\subsection{Concurrencia} % (fold)
+\label{sub:concurrencia}
+
+
+Un programa concurrente necesita realizar varias tareas al mismo tiempo. Estas
+tareas no necesariamente tienen que estar relacionadas entre si. El correcto
+funcionamiento de un programa concurrente no necesita varios núcleos.
+
+En contraste, un programa paralelo soluciona un solo problema con el mejor
+rendimiento posible, empleando para eso más de un núcleo.
+
+\subsubsection{Threads} % (fold)
+\label{ssub:threads}
+
+Un hilo es una acción \textit{IO} que se ejecuta independientemente
+de los otros hilos. Los hilos en Haskell no son determinísticos.
+Para crear un thread, usamos la función \textit{forkIO} del módulo
+\textit{Control.Concurrent}.
+
+Un ejemplo de uso podría ser la compresión de un archivo
+
+% subsubsection threads (end)
+
+% subsection concurrencia (end)
+
+
+\subsection{Paralelismo} % (fold)
+\label{sub:paralelismo}
+
+
+
+% subsection paralelismo (end)

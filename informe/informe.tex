@@ -5,8 +5,17 @@
 \usepackage{lmodern}
 \usepackage{listings}
 \usepackage{url}
+\usepackage{color}
+
+\definecolor{lightgray}{rgb}{0.93,0.93,0.93}
 
 \lstloadlanguages{Haskell}
+
+\lstset{ %
+  backgroundcolor=\color{lightgray},
+  language=Haskell
+}
+
 \urlstyle{same}
 
 \title{Haskell}
@@ -19,12 +28,17 @@
 
   \input{monads.tex}
 
+  \input{concurrency.tex}
+
 
 
 \begin{thebibliography}{3}
 
 \bibitem{Common01}
   ¡Aprende Haskell por el bien de todos!, http://aprendehaskell.es
+
+\bibitem{Common02}
+  Real World Haskell, http://book.realworldhaskell.org
 
 \bibitem{Recursion01}
   Recursion, \url{http://en.wikibooks.org/wiki/Haskell/Recursion}
@@ -50,6 +64,9 @@
 
 \bibitem{Monads05}
   All about monads, \url{https://wiki.haskell.org/All_About_Monads}
+
+\bibitem{Monads05}
+  The State Monad: A Tutorial for the Confused?, \url{http://brandon.si/code/the-state-monad-a-tutorial-for-the-confused/}
 
 \end{thebibliography}
 
