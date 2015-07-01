@@ -1,0 +1,103 @@
+
+\section{Functiones de orden superior} % (fold)
+\label{sec:functiones_de_orden_superior}
+
+
+Una función de orden superior es aquella que puede tomar funciones como parámetro, o devolver una función como resultado, o ambas cosas.
+
+Haskell no solo soporta las funciones de orden superior, sino que hace un uso permanente de esta cualidad, y de forma muy natural.
+
+
+\subsection{Funciones como parametro} % (fold)
+\label{sub:funciones_como_parametro}
+
+Funciones como parámetro
+
+Una función que puede tomar como parámetro a otra función es considerada de orden superior. En Haskell esto se utiliza todo el tiempo para filtrar datos mediante algún criterio, realizar una acción sobre un conjunto de datos, etc.
+
+Un ejemplo de una función que viene por defecto en Haskell que toma funciones como parámetro es la función filter, a la cual se le pasa una función y una lista, filter llama a la función con cada elemento de la lista, si la función devuelve true el elemento es añadido a la lista que da como resultado.
+
+Si se implementa una función fQuickSort a la que le paso una función f que dado un elemento de la lista me devuelve un valor comparable, y una lista que quiero ordenar de la siguiente forma:
+
+\begin{lstlisting}
+fQuickSort :: (Ord b) => (a -> b) -> [a] -> [a]
+fQuickSort _ [] = []
+fQuickSort f (x:xs) =
+  let
+      menores = fQuickSort f [a | a <- xs, (f a) <= (f x)]
+      mayores = fQuickSort f [a | a <- xs, (f a) > (f x)]
+  in menores ++ [x] ++ mayores
+\end{lstlisting}
+
+En esta implementación es realmente versátil, ya que dependiendo que función f se utilice para medir el “tamaño” de los elementos de la lista obtendremos un resultado distinto, y no restringimos los elementos de la lista a elementos ordenables, dado que el criterio de orden los obtenemos en función de la “medida” de los elementos.
+
+% subsection funciones_como_parametro (end)
+\subsection{Funciones como resultado} % (fold)
+\label{sub:funciones_como_resultado}
+
+Dijimos que una función también es de orden superior si puede dar como resultado otra función. Esto es útil, pues se puede crear constructores de funciones, estos constructores recibirán un valor, y devolverán una función para cada valor que tomen. Por ejemplo:
+
+\begin{lstlisting}
+mutiplicarPor :: (Num a =>) a -> (a -> a)
+multiplicarPor x = (*) x
+\end{lstlisting}
+
+Para cada valor de x, multiplicarPor da como resultado una función que recibe un numero y devuelve el el producto del numero pasado con x.
+
+
+
+En realidad, Haskell utiliza las funciones de orden superior todo el tiempo, ya que las funciones de Haskell solo pueden tomar una única variable, esto es lo mismo que decir que las funciones en Haskell están Currificadas. No hay ninguna contradicción, cuando tenemos una función que aparenta recibir más de una variable lo que en realidad tenemos es una función que recibe un dato y nos devuelve una función, la cual toma el siguiente dato, y nos devuelve otra función y así sucesivamente. Esta es la explicación del porque cuando anotamos en la definición de tipos de una función no diferenciamos entre los parámetros de entrada y el valor de retorno.
+
+La Currificación hace evidente la necesidad de que el lenguaje soporte funciones de orden superior. A medida que vamos aplicando parcialmente la función vamos obteniendo nuevas funciones como resultado, y este es el concepto de que una función sea de orden superior por devolver una función. Usando el ejemplo anterior, el fQuickSort es un constructor de sorts, al que se le pasa una función f y nos da un sort que ordena con un determinado criterio, lo mismo pasa con filter y map.
+
+En Haskell este tipo de funciones son tan comunes que tiene montones de aplicaciones en las librerías standar utilizando funciones de orden superior, ya mencionamos las funciones  filter y map, pero se incluyen muchos más.
+
+% subsection funciones_como_resultado (end)
+
+\subsection{Plieges (folds)} % (fold)
+\label{sub:plieges_}
+
+Unas funciones particularmente útiles y cómodas son los pliegues (folds).
+Como en Haskell las variables son inmutables no existen los iteradores clásicos de los lenguajes imperativos, sino que se utiliza la recursividad de las funciones, esto es tan común que existen algunas funciones útiles tienen incorporado estos patrones para realizar iteraciones. Si querríamos implementar la función elem utilizando pliegues podríamos hacerlo como
+
+\begin{lstlisting}
+elem' :: (Eq a)=> a -> [a] -> Bool
+elem' y ys = foldl f False ys
+  where f acc x = if x==y then True else acc
+\end{lstlisting}
+
+Lo que estamos haciendo es pasarle a nuestro pliegue una función que devuelve True si el elemento que recibe es el mismo que el que nosotros buscamos, y sino devuelve el acc, además la función recibe como “segundo” parámetro el valor inicial del acumulador que va a pasarle a la función, y una lista sobre la que deseamos que itere. Lo que hace foldl es agarrar la cabeza de la lista, pasarselo a la función f, y tomar el valor obtenido como nuevo acumulador, luego se llama a si mismo con la cola de la lista, la misma función y este nuevo acumulador. El resultado que devuelve foldl es el ultimo valor que devuelve el acumulador.
+
+Si quisiéramos implementar foldl podríamos hacerlo así:
+
+\begin{lstlisting}
+foldl' :: (a->b->a)-> a->[b]->a
+foldl' _ acc [] = acc
+foldl' f acc (x:xs) = foldl' f (f acc x) xs
+\end{lstlisting}
+
+% subsection plieges_ (end)
+
+
+\subsection{Funciones Anónimas (lambdas)} % (fold)
+\label{sub:funciones_an_nimas_}
+
+
+Al usar este tipo de funciones solemos tener que crear funciones con el único objetivo de pasarlas a nuestras funciones de orden superior, lo cual no tiene mucho sentido, para esto aparecen las denominadas funciones anónimas, o funciones lambdas. Las funciones lambda son expresiones (devuelven un valor), por eso podemos pasarlas como parámetros a funciones de orden superior.
+Su sintaxis es:
+
+\begin{lstlisting}
+(\a b -> 2a/b)
+\end{lstlisting}
+
+donde a y b son los parámetros que recibe, lo que sucede a  -> indica que el comportamiento de dicha función. Suelen estar encerradas entre paréntesis para delimitarlas, de lo contrario tomarán todo el renglón.
+Utilizando este tipo de funciones, podríamos haber escrito nuestro pliegue como
+
+\begin{lstlisting}
+elem' :: (Eq a)=> a -> [a] -> Bool
+elem' y ys = foldl (\acc x-> if x==y then True else acc) False ys
+\end{lstlisting}
+
+% subsection funciones_an_nimas_ (end)
+
+% section functiones_de_orden_superior (end)

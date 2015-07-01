@@ -1,0 +1,20 @@
+
+\section{Garbage Collection} % (fold)
+\label{sec:garbage_collection}
+
+Muchos lenguajes implementan un Garbage Collection (GC) para ocuparse de los objetos no alcanzables y liberar dicha memoria.
+
+
+Los lenguajes imperativos suelen generar una cantidad de basura a lo largo de su ejecución, y si estos constan de un GC simplifican la vida del programador, al desligarlo de la necesidad de liberar el espacio no utilizado, y de no deber perder nunca la referencia. De lo contrario, si un lenguaje posee un GC, el programador debe olvidarse de lo que no necesite, simplemente haciendolo inalcanzable, de este modo las referencias almacenadas son solos las que en ese momento resultan útiles, el GC pasará en algún momento y liberará la memoria no alcanzable.
+
+
+Los lenguajes funcionales, como lo es Haskell, suelen generar muchísima mas basura que los lenguajes imperativos, esto es debido a la inmutabilidad de sus variables, y para guardar un nuevo valor es necesario crear una nueva variable. Cada iteración en un llamado recursivo genera un nuevo valor. En Haskell no es insólito producir 1Gb de datos en un segundo.
+Para esto el compilador de Haskell GHC tiene un potente GC que se ocupa de gestionar la basura en forma eficiente.
+
+
+La inmutabilidad de las variables en Haskell no solo obliga a generar gran cantidad de basura, sino que esta característica es aprovechada para realizar la recolección.
+Para esto utiliza el criterio de generación: datos jóvenes y viejos. Las variables mas viejas, al ser inmutables, no apuntan nunca a un dato joven, pues los datos jóvenes no existen en el momento en que las variables viejas son creadas. Esta es la idea que utiliza el recolector de basura de Haskell para aumentar la eficiencia.
+El recolector de basura no mirará toda la memoria en la que estuvo trabajando nuestro programa, sino que sólo revisará entre los valores más jóvenes, y liberará los que no estén señalados, que suelen ser la gran mayoría, dado el comportamiento recursivo. Esto también es una ventaja, porque en realidad, mientras mas basura joven aparezca menor es el trabajo que realiza el recolector de basura; esto, que resulta tan poco intuitivo se explica con la forma que se utiliza para almacenar los datos jóvenes y los viejos.
+Los datos jóvenes son almacenados en un bloque de memoria especial, una “guardería”, cuando esta guardería se llena el GC mira sólo en esta memoria quienes son alcanzables, por lo tanto útiles y los copia en la memoria de las variables mas viejas, luego nos habilita a reutilizar la “guardería”, la cual se encuentra “vacía”, ya que cualquier dato que pisemos no será útil, o lo tendremos copiado con los valores mas viejos. Este es el motivo por el cual, con mayor cantidad de basura joven, la recolección es más rápida, lo que sucede es que hay menos datos que copiar.
+
+% section garbage_collection (end)

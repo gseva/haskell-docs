@@ -3,6 +3,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
+\usepackage{graphicx}
 \usepackage{listings}
 \usepackage{url}
 \usepackage{color}
@@ -10,6 +11,8 @@
 \definecolor{lightgray}{rgb}{0.93,0.93,0.93}
 
 \lstloadlanguages{Haskell}
+
+\graphicspath{ {images/} }
 
 \lstset{ %
   backgroundcolor=\color{lightgray},
@@ -24,11 +27,19 @@
   \lstset{language=Haskell}
   \maketitle
 
-  \input{recursion.tex}
+  \input{partes/inference.tex}
 
-  \input{monads.tex}
+  \input{partes/recursion.tex}
 
-  \input{concurrency.tex}
+  \input{partes/gc.tex}
+
+  \input{partes/higherorder.tex}
+
+  \input{partes/functors.tex}
+
+  \input{partes/monads.tex}
+
+  \input{partes/concurrency.tex}
 
 
 
@@ -40,12 +51,18 @@
 \bibitem{Common02}
   Real World Haskell, http://book.realworldhaskell.org
 
+\bibitem{Inference02}
+  “What part of Milner-Hindley do you not understand?”, http://stackoverflow.com/questions/12532552/what-part-of-milner-hindley-do-you-not-understand
+
 \bibitem{Recursion01}
   Recursion, \url{http://en.wikibooks.org/wiki/Haskell/Recursion}
 
 \bibitem{Recursion02}
   Recursion Patterns,
   \url{https://www.fpcomplete.com/school/starting-with-haskell/introduction-to-haskell/3-recursion-patterns-polymorphism-and-the-prelude}
+
+\bibitem{GC01}
+  GHC Memory Management, \url{https://wiki.haskell.org/GHC/Memory_Management}
 
 \bibitem{Laziness01}
   Laziness, \url{http://en.wikibooks.org/wiki/Haskell/Laziness}
@@ -65,7 +82,7 @@
 \bibitem{Monads05}
   All about monads, \url{https://wiki.haskell.org/All_About_Monads}
 
-\bibitem{Monads05}
+\bibitem{Monads06}
   The State Monad: A Tutorial for the Confused?, \url{http://brandon.si/code/the-state-monad-a-tutorial-for-the-confused/}
 
 \end{thebibliography}

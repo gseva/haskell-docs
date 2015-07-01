@@ -1,0 +1,88 @@
+\section{Functores} % (fold)
+\label{sec:functores}
+
+Los functores son una clase de tipos que tiene un método llamado fmap, donde
+
+\begin{lstlisting}
+fmap :: (a -> b) -> f a -> f b
+\end{lstlisting}
+
+La idea de fmap es que toma una funcion de a en b, un functor que contiene un a, y devuelve un functor que tiene un b. Una idea intuitiva de un functor podría ser como una caja, fmap abre esta caja, aplica f al contenido y devulve una caja con el resultado de aplicar la función.
+
+Un término más correcto para definir lo que es un funtor sería contexto computacional. El contexto sería que la computación podría tener un valor, o podría fallar. Si queremos un constructor de tipos que sea una instancia de functor este debe pertenecer a la familia \lstinline$* -> *$.
+
+Algunos functores básicos son las listas [], Maybe, Either a (en este ultimo caso, como necesitamos que nuestro tipo tome un único tipo concreto y Either toma dos debe estar parcialmente evaluda), si se definiese una clase Tree a también podría ser un funtor. Otros no tan claros son IO y (->) r.
+
+Las acciones IO son como cajas que encierran datos que provienen del mundo real, o que saldrán al mismo, podemos ligar el contenido de una acción IO a una variable usando <-, trabajar con estos datos, realizar algunos calculos, pero cuando querramos sacarlos al mundo exterior es necesario transformarlos en otra acción IO usando return. Si queremos mapear un valor IO  lo que en realidad buscamos es obtener una nueva acción IO que contenga el resultado de aplicar una determinada función, esto será:
+
+\begin{lstlisting}
+instance Functor IO where
+  fmap f action = do
+    result <- action
+    return (f result)
+\end{lstlisting}
+
+El tipo de una función r -> a se puede reescribir como (->) r a esto indica que (->) r es una caja de a. Como -> es de la familia \lstinline$* ->  * -> *$ debe estar parcialmente aplicado, igual que Either.
+
+\begin{lstlisting}
+instance Functor ((->) r) where
+  fmap f g = (\x -> f (g x))
+\end{lstlisting}
+
+Aplicar fmap a una función nos da una nueva función, si pensamos que aplicamos esta nueva funcion a un valor esto daría por resultado la función original aplicada a nuestro valor, y a este resultado le aplicaría la función que le pasamos a fmap, esto no es otra cosa que realizar la composición de funciones.
+
+\begin{lstlisting}
+instance Functor ((->) r) where
+  fmap = (.)
+\end{lstlisting}
+
+\subsection{Leyes de los Functores} % (fold)
+\label{sub:leyes_de_los_functores}
+
+
+Ahora vamos a ver las leyes de los functores. Para que algo sea una functor, debe satisfacer una serie de leyes. Se espera que todos los functores exhiban una serie de propiedades y comportamientos. Deben comportarse fielmente como cosas que se puedan mapear. Al llamar fmap sobre un functor solo debe mapear una función sobre ese funtor, nada más. Este comportamiento se describe en las leyes de los functores. Hay dos de ellas que todas las instancias deFunctor deben cumplir, pero Haskell no hace esta comprobación, debe ser verificada por el usuario que la implementa.
+
+La primera ley de funtores establece que si mapeamos la función identidad sobre un functor, el functor que obtenemos debe ser igual que el original (fmap id = id).
+
+La segunda ley dice que si mapeamos el resultado de una composición de dos funciones sobre un funtor debe devolver lo mismo que si mapeamos una de estas funciones sobre el funtor inicial y luego mapeamos la otra función \lstinline$((f . g) = fmap f)$
+
+% subsection leyes_de_los_functores (end)
+
+\subsection{Functores Aplicativos} % (fold)
+\label{sub:functores_aplicativos}
+
+
+Dentro de un functor podemos tener almacenado cualquier tipo de valor, y como en Haskell las funciones son ciudadanos de primer orden estas también son un valor, por ende podemos tener funciones encerradas dentro de un functor, por ejemplo, si hacemos
+
+\begin{lstlisting}
+fmap (*) Just 7
+\end{lstlisting}
+
+obtenemos
+
+\begin{lstlisting}
+Just (* 7)
+\end{lstlisting}
+
+Si queremos aplicar la función almacenada a el valor almacenado por Just 11 podriamos tratar de hacerlo, pero si queremos un comportamiento que funcione en todos los functores debemos crear algo más general, este es el motivo por el cual aparecen los functores aplicativos.
+
+\begin{lstlisting}
+class (Functor f) => Applicative f where
+  pure :: a -> f a
+  (<*>) :: f (a -> b) -> f a -> f b
+\end{lstlisting}
+
+La definición de esta clase de tipos nos dice que si alguien es un Applicativa también es un Functor.
+Las funciones no están implementadas por defecto, pero pure toma un valor y lo encapsula dentro de un functor aplicativo.
+La segunda funcion es una ampliacion de fmap, toma un functor aplicativo, “extrae” su función, y mapea dicha función sobre otro functor. La clase de tipos maybe los implementa de la sigueinte forma:
+
+\begin{lstlisting}
+instance Applicative Maybe where
+  pure = Just
+  Nothing <*> _ = Nothing
+  (Just f) <*> something = fmap f something
+\end{lstlisting}
+
+% subsection functores_aplicativos (end)
+
+% section functores (end)
