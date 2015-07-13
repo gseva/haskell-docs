@@ -1,0 +1,38 @@
+
+\section{Software Transactional Memory} % (fold)
+\label{sec:software_transactional_memory}
+
+\textit{Software Transactional Memory}, \textbf{STM}, es un módulo que nos da herramientas simples, pero poderosas, que buscan solucionar los problemas de concurrencia comunes (los mencionamos en el capítulo ~\ref{sec:concurrencia}).
+
+La idea es muy sencilla: ejecutamos un bloque de acciones como una transacción, utilizando la función \textbf{atomically}. Una vez que entramos a ese bloque, otros hilos no pueden ver ninguna modificación hasta que terminemos la ejecución, y tampoco podemos ver modificaciones realizados por otros hilos desde ese bloque. Por esas propiedades decimos que nuestra ejecución está \textit{isolada}.
+
+Cuando salimos de la transacción, puede ocurrir una de las dos posibilidades:
+
+1. Si ningún otro hilo modifica los mismos datos, todas las modificaciones ocurridas durante la transacción serán visibles para los otros threads.
+
+2. En el otro caso, todas las modificaciones hechas se descartan y nuestro bloque de acciones se vuelve a ejecutar automáticamente.
+
+En el siguiente ejemplo sencillo de una cuenta bancaria podemos ver su funcionamiento:
+
+\begin{lstlisting}
+import Control.Concurrent.STM
+
+type Account = TVar Int
+
+withdraw :: Account -> Int -> STM ()
+withdraw acc amount = do
+    bal <- readTVar acc
+    writeTVar acc (bal - amount)
+
+deposit :: Account -> Int -> STM ()
+deposit acc amount = withdraw acc (- amount)
+
+atomically $ do
+    acc <- newTVar (20 :: Int)
+    deposit acc 20
+    withdraw acc 10
+    readTVar acc
+\end{lstlisting}
+
+
+% section software_transactional_memory (end)

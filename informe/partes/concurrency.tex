@@ -1,34 +1,132 @@
 
 
-\subsection{Concurrencia} % (fold)
-\label{sub:concurrencia}
+\section{Concurrencia} % (fold)
+\label{sec:concurrencia}
 
 
-Un programa concurrente necesita realizar varias tareas al mismo tiempo. Estas
-tareas no necesariamente tienen que estar relacionadas entre si. El correcto
-funcionamiento de un programa concurrente no necesita varios núcleos.
+Un programa concurrente necesita realizar varias tareas al mismo tiempo. Estas tareas no necesariamente tienen que estar relacionadas entre si. El correcto funcionamiento de un programa concurrente no necesita varios núcleos.
 
-En contraste, un programa paralelo soluciona un solo problema con el mejor
-rendimiento posible, empleando para eso más de un núcleo.
+En contraste, un programa paralelo soluciona un solo problema con el mejor rendimiento posible, empleando para eso más de un núcleo.
 
-\subsubsection{Threads} % (fold)
+\subsection{Threads} % (fold)
 \label{ssub:threads}
 
-Un hilo es una acción \textit{IO} que se ejecuta independientemente
-de los otros hilos. Los hilos en Haskell no son determinísticos.
-Para crear un thread, usamos la función \textit{forkIO} del módulo
-\textit{Control.Concurrent}.
+Un hilo es una acción \textit{IO} que se ejecuta independientemente de los otros hilos. Los hilos en Haskell no son determinísticos.
+Para crear un thread, usamos la función \textit{forkIO} del módulo \textit{Control.Concurrent}.
 
-Un ejemplo de uso podría ser la compresión de un archivo
+Un ejemplo de uso podría ser la compresión de un archivo:
+
+\begin{lstlisting}
+import Control.Concurrent (forkIO)
+import qualified Data.ByteString.Lazy as L
+import Codec.Compression.GZip (compress)
+
+compressFile = L.writeFile "files/foo.gz" . compress
+
+do
+    content <- L.readFile "files/foo.txt"
+    forkIO (compressFile content)
+    putStrLn "Gracias por comprimir!"
+    return ()
+\end{lstlisting}
 
 % subsubsection threads (end)
+
+\subsection{Comunicación entre hilos} % (fold)
+\label{ssub:comunicaci_n_entre_hilos}
+
+La forma más simple que tiene un hilo para comunicarse con otro es compartiendo una variable. En Haskell podemos lograrlo utilizando una variable sincronizable \textbf{MVar}. Una \textbf{MVar} actúa como una caja con un solo elemento, que puede estar vacia o llena. Si tratamos de poner un valor adentro de una \textbf{MVar} que ya está llena, la ejecución del hilo en cuestión se suspenderá hasta que otro hilo la vacie. De la misma manera, si intentamos sacar el valor de una \textbf{MVar} vacia, el hilo se suspenderá hasta que algún otro thread le agregue algo. En el siguiente ejemplo se puede ver el uso de una \textbf{MVar}:
+
+\begin{lstlisting}
+import Control.Concurrent
+
+do
+  m <- newEmptyMVar
+  forkIO $ do
+    v <- takeMVar m
+    putStrLn ("Recibido " ++ show v)
+  putStrLn "Enviando"
+  putMVar m "Hola!"
+\end{lstlisting}
+
+Utilizamos la función \textit{newEmptyMVar} para crear una MVar, \textit{putMVar} para ponerle un valor adentro y \textit{takeMVar} para sacarlo. Notese que solo podemos utilizar una MVar adentro de un bloque \textit{do}.
+
+% subsubsection comunicaci_n_entre_hilos (end)
+
+\subsection{Comunicación por canales} % (fold)
+\label{ssub:comunicaci_n_por_canales}
+
+Utilizando el tipo \textit{Chan}, podemos crear una comunicación mediante un canal. El siguiente código ejemplifica su uso:
+
+\begin{lstlisting}
+import Control.Concurrent
+import Control.Concurrent.Chan
+
+do
+  ch <- newChan
+  forkIO $ writeChan ch "Hola!"
+  forkIO $ writeChan ch "Hola desde otro hilo!"
+  readChan ch >>= print
+  readChan ch >>= print
+\end{lstlisting}
+
+Si el \textit{Chan} está vacio, el bloque \textit{readChan} espera hasta que haya un valor para leer. La función \textit{writeChan} nunca se bloquea, escribe al canal inmediatamente.
+
+% subsubsection comunicaci_n_por_canales (end)
+
+\subsection{Aclaraciones y problemas} % (fold)
+\label{ssub:aclaraciones_y_problemas}
+
+Para tener en cuenta: \textbf{MVar} y \textbf{Chan} no son \textit{estrictos}, su contenido no es evaluado sin explicitarlo. Además, el \textbf{writeChan} siempre acepta lo que se le escribe. Si un hilo escribe más frecuentemente que otro lee los mensajes, el canal crecerá desatendidamente.
+
+Ambos métodos de comunicación entre hilos sufren de una serie de problemas típicos de concurrencia de estado compartido (en el caso de \textit{Chan} se debe a que internamente están implementados con Mvars). Los problemas más conocidos son \textit{deadlock} y \textit{starvation}. En una situación de \textit{Deadlock} dos o más hilos quedan suspendidos para siempre esperando el acceso a un recurso compartido. \textit{Starvation} ocurre cuando un recurso es tomado por mucho tiempo por un hilo, mientras otro hilo no puede progresar, esperando el acceso (y probablemente la ejecución de ese último hilo es mucho más rápida).
+
+Esos problemas típicos se tratan de solucionar con formas más recientes de hacer concurrencia, como por ejemplo \textit{Software Transactional Memory}, que analizaremos más adelante.
+
+% subsubsection aclaraciones_y_problemas (end)
 
 % subsection concurrencia (end)
 
 
-\subsection{Paralelismo} % (fold)
+\section{Paralelismo} % (fold)
 \label{sub:paralelismo}
 
+Para muchos problemas costosos de resolver, podríamos obtener el resultado más rápido separando la solución y evaluandola en varios núcleos. Por defecto ghc utiliza un solo núcleo. Para poder tomar provecho de múltiples núcleos necesitamos pasarle la opción \textbf{-threaded} al compilador a la hora de linkear.
 
+Un ejemplo de uso de evaluación paralela sería la siguiente función, inspirado en el famoso algoritmo Quicksort. El siguiente código es el sort secuencial:
+
+\begin{lstlisting}
+sort :: (Ord a) => [a] -> [a]
+sort (x:xs) = lesser ++ x:greater
+  where lesser = sort [y | y <- xs, y < x]
+        greater = sort [y | y <- xs, y >= x]
+sort _ = []
+\end{lstlisting}
+
+De la siguiente manera lo convertimos en un código que se ejecuta en paralelo.
+
+\begin{lstlisting}
+import Control.Parallel (par, pseq)
+
+parSort :: (Ord a) => [a] -> [a]
+parSort (x:xs) = force greater `par` (force lesser `pseq`
+                                      (lesser ++ x:greater))
+                  where lesser = parSort [y | y <- xs, y < x]
+                        greater = parSort [y | y <- xs, y >= x]
+parSort _ = []
+\end{lstlisting}
+
+Es solo un poco más complicado que la versión inicial: agregamos las funciones \textbf{par}, \textbf{pseq} y \textbf{force}. La función \textbf{par} evalúa el argumento de la derecha a \textit{Weak Head Normal Form} y retorna el de la izquierda. Para programas paralelos \textit{Weak Head Normal Form} significa que la expresión está evaluada hasta el constructor de más afuera. Por ejemplo, para la expresión \textbf{[1, 2, 3]}, \textit{WHNF} es evaluar el constructor de lista y no el contenido de la misma. Lo interesante del \textbf{par}, es que \textit{puede} evaluar el argumento a la izquierda en paralelo.
+
+La función \textbf{pseq} es similar, solo que garantiza que el elemento a la izquierda será evaluado a \textit{WHNF} antes del argumento de la derecha. \textbf{force} es necesario para forzar la evaluación de la lista. Podemos definir \textbf{force} de la siguiente manera:
+
+\begin{lstlisting}
+force :: [a] -> ()
+force xs = go xs `pseq` ()
+  where go (_:xs) = go xs
+        go [] = 1
+\end{lstlisting}
+
+La función \textbf{par} no promete que una expresión será evaluada en paralelo con otra, pero si promente hacerlo si \"tiene sentido\". Esta promesa le da la posibilidad de actuar inteligentemente a la hora de ejecutar un \textbf{par}. En tiempo de ejecución, el programa puede decidir que la expreción es muy liviana, como para que la ejecución paralela tenga sentido. O puede notar que todos los núcleos están ocupados en el momento.
 
 % subsection paralelismo (end)

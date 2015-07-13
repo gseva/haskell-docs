@@ -1,22 +1,50 @@
-\documentclass{article}
+\documentclass[a4paper]{article}
 
 \usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
 \usepackage{graphicx}
+\usepackage{lastpage}
 \usepackage{listings}
+\usepackage{fancyhdr}
 \usepackage{url}
 \usepackage{color}
+\usepackage{fullpage}
+\usepackage{float}
 
-\definecolor{lightgray}{rgb}{0.93,0.93,0.93}
+\definecolor{lightgray}{rgb}{0.95,0.95,0.95}
 
 \lstloadlanguages{Haskell}
 
 \graphicspath{ {images/} }
 
-\lstset{ %
+\setlength{\footskip }{20pt}
+\setlength{\headsep }{30pt}
+\addtolength{\textheight}{-40pt}
+
+\lstset{
+  frame=none,
+  xleftmargin=2pt,
+  stepnumber=1,
+  numbers=left,
+  numbersep=5pt,
+  numberstyle=\ttfamily\tiny\color[gray]{0.3},
+  belowcaptionskip=\bigskipamount,
+  captionpos=b,
+  escapeinside={*'}{'*},
+  language=haskell,
+  tabsize=2,
+  emphstyle={\bf},
+  commentstyle=\it,
+  stringstyle=\mdseries\rmfamily,
+  showspaces=false,
+  keywordstyle=\bfseries\rmfamily,
+  columns=flexible,
+  basicstyle=\small\sffamily,
+  showstringspaces=false,
+  morecomment=[l]\%,
   backgroundcolor=\color{lightgray},
-  language=Haskell
 }
 
 \urlstyle{same}
@@ -24,8 +52,20 @@
 \title{Haskell}
 
 \begin{document}
-  \lstset{language=Haskell}
-  \maketitle
+
+\input{partes/title.tex}
+
+\pagestyle{fancy}
+\lhead{\slshape \leftmark}
+\rhead{Página \thepage\  de  \pageref{LastPage}}
+\chead{\scalebox{0.1}{asasasa}}
+\lfoot{Universidad de \\ Buenos Aires}
+\cfoot{Teoría de \\ Lenguaje}
+\rfoot{Gavrilov, Hazan, Bellegarde\\}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+  \tableofcontents
 
   \input{partes/inference.tex}
 
@@ -39,8 +79,11 @@
 
   \input{partes/monads.tex}
 
+  \input{partes/zippers.tex}
+
   \input{partes/concurrency.tex}
 
+  \input{partes/stm.tex}
 
 
 \begin{thebibliography}{3}

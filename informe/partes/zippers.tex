@@ -1,0 +1,58 @@
+\section{Zippers} % (fold)
+\label{sec:zippers}
+
+Los zippers tienen como objetivo lograr un movimiento de forma eficiente en una estructura, conocida, que almacena datos. En un zipper se almacena el dato al que se ha llegado por un movimiento y, además, la información necesaria para reconstruir toda la estructura original.
+
+Un problema muy sencillo para ver la utilidad de los zippers es el de querer aplicar una función en una hoja de un árbol, y luego aplicar la misma función en el hermano de dicha hoja. Si no se contase con una estructura del tipo zipper, habría que realizar todo el recorrido hasta la hoja, luego aplicar la función, y luego volver, desde la raíz a realizar el mismo recorrido, salvo en el último movimiento, y nuevamente aplicar la función. Usando los zippers podemos movernos hasta la hoja deseada, y como podemos reconstruir la estructura, podemos pedir el padre, y además saber si el nodo actual era el hijo izquierdo o el derecho, para así saltar al nodo hermano y aplicar nuevamente la función.
+Con este ejemplo se observa que al querer realizar determinadas acciones con bloques de información de una estructura, y estos datos se encuentran “próximos” en dicha estructura, al construir un zipper para esta estructura nos ahorramos recorrer reiteradas veces la estructura original, mejorando la velocidad de nuestro programa.
+
+Volviendo al ejemplo del árbol binario podemos definir las estructuras de la siguiente forma:
+
+\begin{lstlisting}
+data Tree a = Empty | Node a (Tree a) (Tree a) deriving (Show)
+data Crumb a = LeftCrumb a (Tree a) | RightCrumb a (Tree a) deriving (Show)
+type Breadcrumbs a = [Crumb a]
+
+type Zipper a = (Tree a, Breadcrumbs a)
+\end{lstlisting}
+
+Aquí se crea el tipo árbol, el cual puede estar vacío o tener un dato y otros dos árboles. El tipo miga, el cual dice si nos movimos a la derecha o a la izquierda, contiene la información que contenía el nodo padre, y además tiene el subárbol  no visitado. Además se crea el sinónimo de tipo migas de pan, que simplemente es una lista de migas. Por ultimo se crea el tipo zipper, el cual tiene el árbol en el cual estaremos parados, y además las migas de pan del camino recorrido.
+Con todos estos tipos de datos definidos podemos crear funciones que nos permitan movernos por de forma adecuada por los árboles.
+
+\begin{lstlisting}
+goUp :: (Tree a, Breadcrumbs a) -> (Tree a, Breadcrumbs a)
+goUp (t, LeftCrumb x r:bs) = (Node x t r, bs)
+goUp (t, RightCrumb x l:bs) = (Node x l t, bs)
+
+goRight :: (Tree a, Breadcrumbs a) -> (Tree a, Breadcrumbs a)
+goRight (Node x l r, bs) = (r, RightCrumb x l:bs)
+
+goLeft :: (Tree a, Breadcrumbs a) -> (Tree a, Breadcrumbs a  )
+goLeft (Node x l r, bs) = (l, LeftCrumb x r:bs)
+\end{lstlisting}
+
+Con estas tres funciones podemos movernos libremente, y eficientemente, sobre el árbol. Si una vez alcanzada una determinada posición queremos realizar un cambio sobre ese árbol podemos usar la siguiente función
+
+\begin{lstlisting}
+modify :: (a -> a) -> Zipper a -> Zipper a
+modify f (Node x l r, bs) = (Node (f x) l r, bs)
+modify f (Empty, bs) = (Empty, bs)
+\end{lstlisting}
+
+Esta función recibirá una función y un zipper, y nos devolverá un nuevo zipper, el cual es el resultado de aplicarle la función al nodo actual. Además podrían crearse otras funciones útiles, por ejemplo, una función que reciba un árbol y devuelva un zipper de dicho árbol, utilizando el árbol pasado como la raíz, una función que dado un zipper indique si se puede subir, o estamos en la raíz del árbol, otra que agregue/reemplace un subárbol por otro que le pasemos, otra que se ocupe de llegar a la raíz, etc.
+
+Otra estructura, más sencilla, en la que son útiles los zippers son las listas, donde los movimientos posibles serían avanzar o retroceder:
+
+\begin{lstlisting}
+type ListZipper a = ([a],[a])
+
+goForward :: ListZipper a -> ListZipper a
+goForward (x:xs, bs) = (xs, x:bs)
+
+goBack :: ListZipper a -> ListZipper a
+goBack (xs, b:bs) = (b:xs, bs)
+\end{lstlisting}
+
+La primera lista del zipper es la cola de la lista original que resulta del movimiento, la segunda es una lista invertida de los elementos que están por delante del elemento actual. En este caso los zippers son mas simples que en los árboles, pero no por esto dejan de ser útiles. En Haskell los Strings son un sinónimo de tipo de una lista de caracteres, o sea que podemos usar un zipper para movernos dentro de un texto, y modificar y o agregar caracteres en el mismo, esto es realmente útil si estamos creando un editor de texto.
+
+% section zippers (end)
