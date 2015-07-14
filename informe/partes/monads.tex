@@ -149,23 +149,66 @@ instance Monad Maybe where
 \end{lstlisting}
 
 La mónada Maybe incorpora la posibilidad de encadenar computaciones que pueden
-devolver Nothing como resultado, en cuyo caso la cadena terminaría antes.
+devolver Nothing como resultado, en cuyo caso la cadena terminaría antes. Por ejemplo:
+
+\begin{lstlisting}
+maybeHalf :: Int -> Maybe Int
+maybeHalf a
+         | even a = Just (div a 2)
+         | otherwise = Nothing
+\end{lstlisting}
+
+La función que acabamos de definir devolverá la mitad de un número, si es par, y \textbf{Nothing} si es impar. La podemos usar de la siguiente manera:
+
+\begin{lstlisting}
+ghc> Just 10 >>= maybeHalf
+Just 5
+ghc> Just 10 >>= maybeHalf >>= maybeHalf
+Nothing
+ghc> Just 10 >>= maybeHalf >>= maybeHalf >>= maybeHalf
+Nothing
+\end{lstlisting}
+
+Sin el uso de la mónada Maybe nos veriamos obligados a anidar if y else para las llamadas consecutivas.
 
 \subsubsection{Either} % (fold)
 \label{ssub:either}
-
 
 Otra mónada muy usada es \textit{Either}. Su tipo está definido de la
 siguiente manera:
 
 \begin{lstlisting}
-  data Either a b = Left a | Right b
+data Either a b = Left a | Right b
 \end{lstlisting}
 
 Su propósito es muy parecido al de Myabe, Left es considerado un error
 mientras que Right - un valor normal. La diferencia es que Left permite
 guardar un valor (a diferencia del Nothing en el caso de Maybe).
+
+Podemos escribir una función que divida un número por una lista de enteros uno por uno segura utilizando \textbf{Either}:
+
+\begin{lstlisting}
+divBy :: Integral a => a -> [a] -> Either String [a]
+divBy _ [] = Right []
+divBy _ (0:_) = Left "divBy: division by 0"
+divBy numerator (denom:xs) =
+    case divBy numerator xs of
+      Left x -> Left x
+      Right results -> Right ((numerator `div` denom) : results)
+\end{lstlisting}
+
+Y la podemos utilizar de la siguiente forma:
+
+\begin{lstlisting}
+ghci> divBy 50 [1,2,5,8,10]
+Right [50,25,10,6,5]
+ghci> divBy 50 [1,2,0,8,10]
+Left "divBy: division by 0"
+\end{lstlisting}
+
 % subsubsection _ither (end)
+
+
 % subsection m_nada_maybe (end)
 
 
@@ -175,7 +218,27 @@ guardar un valor (a diferencia del Nothing en el caso de Maybe).
 La mónada Error es la forma que tiene Haskell de simular las
 \textit{excepciones}. Se logra de la siguiente forma: se encadenan
 computaciones que pueden lanzar excepción derivando la ejecución a la
-instancia que puede manejarla.
+instancia que puede manejarla. Esta es la definición de \textbf{MonadError}:
+
+\begin{lstlisting}
+class Monad m => MonadError e m | m -> e where
+    throwError :: e -> m a
+    catchError :: m a -> (e -> m a) -> m a
+\end{lstlisting}
+
+Un ejemplo de uso es:
+
+\begin{lstlisting}
+example :: (Error e, MonadError e m) => m String
+example = throwError (strMsg "Esto es un error")
+    `catchError` const (return "Atrapo el error")
+
+example >>= putStrLn        -- Imprime "Atrapo el error"
+\end{lstlisting}
+
+Note que el tipo MonadError lleva 2 parametros, \textbf{e}, el tipo de error, y \textbf{m}, constructor que representa una mónada. Mas adelante en la definición se ve que el \textbf{throwError} y \textbf{catchError} son métodos de la clase MonadError, siendo los equivalentes a las estructuras familiares de otros lenguajes. Eso tiene la ventaja de poder definir su significado para cada mónada particular.
+
+
 
 % subsection m_nada_error (end)
 

@@ -35,4 +35,26 @@ atomically $ do
 \end{lstlisting}
 
 
+\textbf{STM} es una mónada parecido a la \textbf{IO}. \textbf{TVar} funciona muy parecido a \textbf{MVar}, solo que solo se puede usar adentro de un bloque \textit{atomically}.
+
+Entre otras funciones útiles de \textbf{STM} se encuentra \textbf{retry}, que permite reiniciar una transacción desde 0 (sin aplicar las modificaciones). Por ejemplo, si quisiéramos solo sacar una cantidad limitada de dinero de nuestra cuenta bancaria, lo podriamos escribir de la siguiente manera:
+
+\begin{lstlisting}
+limitedWithdraw :: Account -> Int -> STM ()
+limitedWithdraw acc amount = do
+    bal <- readTVar acc
+    if amount > 0 && amount > bal
+    then retry
+    else writeTVar acc (bal - amount)
+\end{lstlisting}
+
+\textbf{orElse} permite hacer una acción en el caso de que otra falle (sea reiniciada):
+
+\begin{lstlisting}
+limitedWithdraw2 :: Account -> Account -> Int -> STM ()
+limitedWithdraw2 acc1 acc2 amt
+    = orElse (limitedWithdraw acc1 amt) (limitedWithdraw acc2 amt)
+\end{lstlisting}
+
+
 % section software_transactional_memory (end)
