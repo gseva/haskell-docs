@@ -1,0 +1,92 @@
+\section{Módulos} % (fold)
+\label{sec:m_dulos}
+
+Los módulos son colecciones de tipos, clases de tipos y funciones relacionadas entre sí.
+En un programa hecho en Haskell, el módulo principal carga otros módulos y utiliza las funciones de los mismos para realizar lo que el programa fuere a hacer.
+Es una buena práctica programar dividiendo el código en módulos lo mas independiente posibles para tener un mejor mantenimiento del programa y aprovechar código que puede ser reutilizado.
+
+\subsection{Sintaxis} % (fold)
+\label{sub:sintaxis}
+La sintaxis para importar módulos en Haskell es \lstinline$import <modulename>$, y las importaciones de los módulos suelen estar al principio de los ficheros ya que deben realizarse antes de definir cualquier función.
+
+Una vez que se importan los módulos, pasan a estar definidos en el espacio global.
+Hay varias maneras de importar un módulo. A continuación veremos ejemplos importando el módulo \textbf{Data.List}, el cual contiene funciones para el manejo de listas:
+
+Si se quiere importar todo el módulo:
+
+\begin{lstlisting}
+import Data.List
+\end{lstlisting}
+
+Para importar algunas funciones del módulo (en este caso las funciones intercalate y sort del módulo \textbf{Data.List}):
+
+\begin{lstlisting}
+import Data.List (intercalate, sort)
+\end{lstlisting}
+
+Para importar todo el módulo excepto una o más funciones (en este caso todo el módulo Data.List excepto sus funciones intercalate y sort):
+
+\begin{lstlisting}
+import Data.List hiding (intercalate, sort)
+\end{lstlisting}
+
+Importaciones cualificadas (para evitar colisiones de nombres):
+
+\begin{lstlisting}
+import qualified Data.Map
+\end{lstlisting}
+
+En este caso, si queremos referirnos, por ejemplo, a la función filter de \textbf{Data.Map}, debemos utilizar \textbf{Data.Map.filter}, mientras que si usamos simplemente filter nos referimos al filtro normal que utiliza Haskell.
+
+Una manera más fácil de hacer llamadas a módulos importados de manera cualificada es renombrar al módulo de manera que la llamada sea más abreviada:
+
+\begin{lstlisting}
+import qualified Data.Map as M
+\end{lstlisting}
+
+De esta manera, si yo quiero llamar a la función filter de \textbf{Data.Map}, debo utilizar simplemente \textbf{M.filter}. Algunos módulos que vienen con Haskell:
+
+\begin{itemize}
+  \item Para listas: \textbf{Data.List}
+  \item Para caracteres: \textbf{Data.Char}
+  \item Para listas de asociación (listas de duplas (\"clave\", \"valor\") ): \textbf{Data.Map}
+  \item Para conjuntos: \textbf{Data.Set}
+\end{itemize}
+% subsection sintaxis (end)
+
+\subsection{Creación de módulos} % (fold)
+\label{sub:creaci_n_de_m_dulos}
+
+Para crear un módulo, lo definimos en el script y dentro del módulo definimos sus funciones (utilizando la construcción \textbf{where}):
+
+\begin{lstlisting}
+module Areas
+( areaCirculo
+, areaCuadrado
+, areaRectangulo
+) where
+
+areaCirculo :: Float -> Float
+areaCirculo radio = pi * (radio ^ 2)
+
+areaCuadrado :: Float -> Float
+areaCuadrado lado = lado ^ 2
+
+areaRectangulo :: Float -> Float -> Float
+areaRectangulo a b = a * b
+\end{lstlisting}
+
+Para importarlo en otro script, se hace como se mencionó anteriormente (Areas está en el mismo directorio donde estamos trabajando):
+
+\begin{lstlisting}
+import Areas
+
+areaCirculo 1.0
+areaCuadrado 2.0
+areaRectangulo 3.0 1.0
+\end{lstlisting}
+
+
+% subsection creaci_n_de_m_dulos (end)
+
+% section m_dulos (end)

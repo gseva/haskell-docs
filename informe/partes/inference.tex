@@ -28,6 +28,10 @@ Este resultado era evidente, ya que en la propia definición lo habíamos indica
 \end{lstlisting}
 
 Al utilizar el comando :t en GHCI obtendremos la misma respuesta que antes, aunque esta vez no le  hayamos indicado al lenguaje los tipos en la definición.
+
+\subsection{Algoritmo de Hindley-Milner} % (fold)
+
+% subsection algoritmo_de_hindley_milner (end)
 Este resultado proviene de que Haskell realiza inferencia de tipos basandose en el algoritmo de Hindley Milner o Damas Milner.
 Este algoritmo sigue seis reglas lógicas:
 \begin{figure}[H]
@@ -43,6 +47,11 @@ Por Ejemplo, la segunda indica que si en nuestro contexto tenemos una expresión
 La quinta nos dice que si en un entorno la expresión e es del tipo $\sigma$' y que $\sigma$' es un subtipo de $\sigma$ entonces la expresión e es del tipo  $\sigma$.
 
 El algoritmo de inferencia de tipos usa estas reglas de forma recursiva. Realiza un ajuste de patrones, donde mira la expresión que tiene, y en cual de los consecuentes encaja mejor, una vez encontrado va a los antecedentes y mira que necesita para que estos se cumplen, si con la información actual es suficiente entonces ha terminado de inducir los tipos, en caso contrario toma estos antecedentes que aun no tiene determinados y vuelve a realizar el mismo ajuste de patrón, y así va infiriendo en cada sub-expresión los tipos necesarios. Cuando encuentra que la información alcanzada es suficiente para cumplir TODAS las hipótesis la inferencia esta completa.
+
+\label{sub:algoritmo_de_hindley_milner}
+
+\subsection{Ejemplo de aplicación del algoritmo} % (fold)
+\label{sub:ejemplo_de_aplicaci_n_del_algoritmo}
 
 Si hacemos el seguimiento del como funciona este algoritmo en la función sumar que tenemos más arriba, y utilizando la currificación de Haskell tenemos que la función es de la forma
 
@@ -103,3 +112,5 @@ t' $\sqsubseteq$ a
 
 Finalmente solo resta recomponer todo, usando que sumar = e'0 e'1 e1
 El tipo de sumar es (Num a) => a $\rightarrow$ a $\rightarrow$ a.
+
+% subsection ejemplo_de_aplicaci_n_del_algoritmo (end)
