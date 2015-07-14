@@ -5,7 +5,7 @@
 Muchos lenguajes implementan un Garbage Collection (GC) para ocuparse de los objetos no alcanzables y liberar dicha memoria.
 
 
-Los lenguajes imperativos suelen generar una cantidad de basura a lo largo de su ejecución, y si estos constan de un GC simplifican la vida del programador, al desligarlo de la necesidad de liberar el espacio no utilizado, y de no deber perder nunca la referencia. De lo contrario, si un lenguaje posee un GC, el programador debe olvidarse de lo que no necesite, simplemente haciendolo inalcanzable, de este modo las referencias almacenadas son solos las que en ese momento resultan útiles, el GC pasará en algún momento y liberará la memoria no alcanzable.
+Los lenguajes imperativos suelen generar una cantidad de basura a lo largo de su ejecución, y si estos constan de un GC simplifican la vida del programador, al desligarlo de la necesidad de liberar el espacio no utilizado, y de no deber perder nunca la referencia. De lo contrario, si un lenguaje posee un GC, el programador debe olvidarse de lo que no necesite, simplemente haciendolo inalcanzable, de este modo las referencias almacenadas son solo las que en ese momento resultan útiles, el GC pasará en algún momento y liberará la memoria no alcanzable.
 
 
 Los lenguajes funcionales, como lo es Haskell, suelen generar muchísima mas basura que los lenguajes imperativos, esto es debido a la inmutabilidad de sus variables, y para guardar un nuevo valor es necesario crear una nueva variable. Cada iteración en un llamado recursivo genera un nuevo valor. En Haskell no es insólito producir 1Gb de datos en un segundo.

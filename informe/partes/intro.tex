@@ -1,0 +1,51 @@
+\section{Introducción} % (fold)
+\label{sec:introducci_n}
+
+Este informe busca reunir, explicar y ejemplificar las características principales del lenguaje \textbf{Haskell}, desde lo básico de la sintaxis hasta técnicas avanzadas y aplicaciones.
+
+\subsection{Características del lenguaje} % (fold)
+\label{sub:caracter_sticas_del_lenguaje}
+
+Haskell es un lenguaje de programación puramente funcional. Decimos que es funcional porque enfatiza la aplicación de funciones y no maneja datos mutables o de estado. Decimos que es puro porque emplea las funciones puras, es decir, que no tienen efectos secundarios, y para una misma entrada siempre se obtiene el mismo resultado. Vamos a ver más adelante que tiene mecanismos para simular funciones impuras (sin ellas no podría comunicarse con el \"mundo real\").
+
+Es nombrado en homenaje al lógico Haskell Curry.
+
+Otras características destacables:
+
+\begin{itemize}
+  \item Tipado fuerte (datos de tipo concreto)
+  \item Tipado estático (comprobación de tipos durante la compilación)
+  \item Inferencia de tipos
+  \item Muy alto nivel
+\end{itemize}
+% subsection caracter_sticas_del_lenguaje (end)
+
+\subsection{Historia} % (fold)
+\label{sub:historia}
+
+Los lenguajes funcionales no son algo nuevo: existian hace mucho tiempo. \textit{Lisp} es considerado el primer lenguaje funcional y fue creado a fines de los 50. Pero el interés hacia ellos creció en los 80 con el lanzamiento de \textit{Miranda}, que fue uno de los primeros lenguajes funcionales que apuntaban al uso comercial en vez del uso académico. El problema es que \textit{Miranda} era propietario y pago. En una conferencia de Lenguajes Funcionales en el 87 la conferencia llegó a un consenso para definir un estandar abierto para estos lenguajes.
+
+La primera versión de Haskell se definió en 1990. Siguieron varias definiciones de espicificaciones, que se fueron enumerando (1.0, 1.1, etc.) y a fines del 1997 culminaron en \textbf{Haskell 98}. A partir de ese momento continuó evolucionando. La útlima especificación usada hasta hoy en día es la del \textbf{Haskell 2010}.
+
+% subsection historia (end)
+
+\subsection{Compiladores e interpretes} % (fold)
+\label{sub:compiladores_e_interpretes}
+
+El compilador de código Haskell más utilizado es GHC (Glasgow Haskell Compiler). Se utilizó para las pruebas del código para este informe. Algunas de sus características:
+
+\begin{itemize}
+  \item Es escrito en Haskell, C y C++.
+  \item Es multiplataforma (Se puede utilizar en Windows, Mac OS y la mayoría de sistemas de Unix).
+  \item Funciona con la mayoria de arquitecturas de procesador.
+  \item Compila a código nativo.
+  \item Posee un interprete (GHCi).
+  \item Soporta concurrencia y paralelismo.
+  \item Posee una gran cantidad de librerías, aunque algunas sólo funcionan bajo GHC.
+\end{itemize}
+
+Entre otras implementaciones se pueden destacar los compiladores \textbf{nhc98} y \textbf{HBC}, y el intérprete \textbf{Hugs}.
+
+% subsection compiladores_e_interpretes (end)
+
+% section introducci_n (end)

@@ -1,10 +1,29 @@
 \section{Sintaxis de funciones} % (fold)
 \label{sec:sintaxis_de_funciones}
 
+Las funciones se definen de una manera similar a como son llamadas. El nombre de la función es seguido por los parámetros. Una definición se escribe agregando la definición de lo que hace la función con un \textbf{=} adelante.
+
+\begin{lstlisting}
+duplicar x = x + x
+\end{lstlisting}
+
+Podemos utilizar la función que acabamos de definir utilizando el interprete de ghci:
+
+\begin{lstlisting}
+ghci> duplicar 10
+20
+ghci> duplicar 3.3
+6.6
+\end{lstlisting}
+
+Haskell posee de las sentencias \textit{if .. then .. else}. La diferencia de los lenguajes imperativos es que la parte \textit{else} es obligatoria:
+
+\begin{lstlisting}
+duplicarNumeroChico x = if x > 100 then x else x * 2
+\end{lstlisting}
 
 \subsection{Pattern Matching} % (fold)
 \label{sub:pattern_matching}
-
 
 A continuación se especificarán algunas construcciones sintácticas denominadas como ajuste de patrones (pattern matching).
 Una de las ventajas del ajuste de patrones es que se puede simplificar el código de manera que quede más elegante, mejorando la legibilidad.

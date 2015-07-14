@@ -11,8 +11,6 @@ Haskell no solo soporta las funciones de orden superior, sino que hace un uso pe
 \subsection{Funciones como parametro} % (fold)
 \label{sub:funciones_como_parametro}
 
-Funciones como parámetro
-
 Una función que puede tomar como parámetro a otra función es considerada de orden superior. En Haskell esto se utiliza todo el tiempo para filtrar datos mediante algún criterio, realizar una acción sobre un conjunto de datos, etc.
 
 Un ejemplo de una función que viene por defecto en Haskell que toma funciones como parámetro es la función filter, a la cual se le pasa una función y una lista, filter llama a la función con cada elemento de la lista, si la función devuelve true el elemento es añadido a la lista que da como resultado.
@@ -45,10 +43,26 @@ multiplicarPor x = (*) x
 Para cada valor de x, multiplicarPor da como resultado una función que recibe un numero y devuelve el el producto del numero pasado con x.
 
 
-
 En realidad, Haskell utiliza las funciones de orden superior todo el tiempo, ya que las funciones de Haskell solo pueden tomar una única variable, esto es lo mismo que decir que las funciones en Haskell están Currificadas. No hay ninguna contradicción, cuando tenemos una función que aparenta recibir más de una variable lo que en realidad tenemos es una función que recibe un dato y nos devuelve una función, la cual toma el siguiente dato, y nos devuelve otra función y así sucesivamente. Esta es la explicación del porque cuando anotamos en la definición de tipos de una función no diferenciamos entre los parámetros de entrada y el valor de retorno.
 
 La Currificación hace evidente la necesidad de que el lenguaje soporte funciones de orden superior. A medida que vamos aplicando parcialmente la función vamos obteniendo nuevas funciones como resultado, y este es el concepto de que una función sea de orden superior por devolver una función. Usando el ejemplo anterior, el fQuickSort es un constructor de sorts, al que se le pasa una función f y nos da un sort que ordena con un determinado criterio, lo mismo pasa con filter y map.
+
+\begin{lstlisting}
+sumar3 x y z = x + y + z
+\end{lstlisting}
+
+\begin{lstlisting}
+ghci> :t sumar3
+sumar3 :: forall a. Num a => a -> a -> a -> a
+ghci> :t sumar3 1
+sumar3 1 :: forall a. Num a => a -> a -> a
+ghci> :t sumar3 1 2
+sumar3 1 2 :: forall a. Num a => a -> a
+ghci> :t sumar3 1 2 3
+sumar3 1 2 3 :: forall a. Num a => a
+ghci> :t 6
+6 :: forall a. Num a => a
+\end{lstlisting}
 
 En Haskell este tipo de funciones son tan comunes que tiene montones de aplicaciones en las librerías standar utilizando funciones de orden superior, ya mencionamos las funciones  filter y map, pero se incluyen muchos más.
 

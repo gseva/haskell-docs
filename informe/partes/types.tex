@@ -1,0 +1,142 @@
+\section{Tipos} % (fold)
+\label{sec:tipos}
+
+Ya hemos mencionado que Haskell tiene tipado estático y fuerte. Esto significa que por ejemplo si queremos dividir un Boolean por un Int no sólo va a dar error sino que además no va a llegar a compilar.
+Al contrario que en Java o en C, donde debemos especificar tipos para que se pueda compilar, en Haskell no siempre es necesario, ya que los tipos, si no se especifican, son inferidos por el compilador.
+Para empezar, vemos unos ejemplos simples de tipos, preguntándole al intérprete de GCH:
+
+\begin{lstlisting}
+ghci> :t 'a'
+'a' :: Char
+ghci> :t True
+True :: Bool
+ghci> :t "HOLA!"
+"HOLA!" :: [Char]
+ghci> :t (True, 'a')
+(True, 'a') :: (Bool, Char)
+ghci> :t 4 == 5
+4 == 5 :: Bool
+\end{lstlisting}
+
+
+De esta manera vemos que cuando se ejecuta el comando :t en una expresión devuelve esa expresión seguida de :: y su tipo.
+En Haskell, las funciones también tienen tipos. Para ver esto vamos a implementar la función declarando primero su tipos. Aquí Haskell no infiere el tipo porque ya está explícito:
+
+\begin{lstlisting}
+sumarDos :: Int -> Int
+sumarDos a = 2 + a
+\end{lstlisting}
+
+Otro ejemplo con 3 entradas:
+
+\begin{lstlisting}
+addThree :: Int -> Int -> Int -> Int
+addThree x y z = x + y + z
+\end{lstlisting}
+
+\textbf{Int} representa enteros. Se utiliza para representar número enteros, por lo que 7 puede ser un \textbf{Int} pero 7.2 no puede. \textbf{Int} está acotado, lo que significa que tiene un valor máximo y un valor mínimo. Normalmente en máquinas
+de 32bits el valor máximo de \textbf{Int} es 2147483647 y el mínimo -2147483648.
+\textbf{Integer} representa enteros también. La diferencia es que no están acotados así que pueden representar
+números muy grandes. Sin embargo, \textbf{Int} es más eficiente.
+
+\begin{lstlisting}
+factorial :: Integer -> Integer
+factorial n = product [1..n]
+\end{lstlisting}
+
+\begin{lstlisting}
+ghci> factorial 50
+30414093201713378043612608166064768844377641568960512000000000000
+\end{lstlisting}
+
+\textbf{Float} es un número real en coma flotante de simple precisión.
+
+\begin{lstlisting}
+circumference :: Float -> Float
+circumference r = 2 * pi * r
+\end{lstlisting}
+
+\begin{lstlisting}
+ghci> circumference 4.0
+25.132742
+\end{lstlisting}
+
+\textbf{Double} es un número real en coma flotante de... ¡Doble precisión!.
+
+\begin{lstlisting}
+circumference' :: Double -> Double
+circumference' r = 2 * pi * r
+\end{lstlisting}
+
+\begin{lstlisting}
+ghci> circumference' 4.0
+25.132741228718345
+\end{lstlisting}
+
+\textbf{Bool} es el tipo booleano. Solo puede tener dos valores: True o False.
+
+\textbf{Char} representa un caracter. Se define rodeado por comillas simples. Una lista de caracteres es una cadena.
+
+\subsection{Variables de tipo} % (fold)
+\label{sub:variables_de_tipo}
+
+Una variable de tipo equivale a un tipo genérico. Las funciones que contienen variables de tipo son funciones polimórficas. Esto se explica en el siguiente ejemplo, preguntándole el tipo a la función head. Ejemplo 1:
+
+\begin{lstlisting}
+ghci> :t head
+head :: forall a. [a] -> a
+\end{lstlisting}
+
+\textbf{forall} a indica que a es una a variable de tipo, o sea que para cualquier tipo a, la declaración de tipos de la función head va a ser  \lstinline$[a] -> a$ (recibe una lista que contiene elementos de cualquier tipo y devuelve un elemento de tal tipo).
+
+La siguiente declaración de tipos indica que la función \textbf{fst} recibe una tupla que contiene elementos de cualquier tipo (pueden ser iguales o no), y devuelve un elemento del tipo del primer elemento de la tupla.
+
+\begin{lstlisting}
+ghci> fst (1, 2)
+1
+ghci> :t fst
+fst :: forall a b. (a, b) -> a
+\end{lstlisting}
+
+% subsection variables_de_tipo (end)
+
+\subsection{Clases de tipo} % (fold)
+\label{sub:clases_de_tipo}
+
+% subsection clases_de_tipo (end)
+
+Las clases de tipo tienen un coportamiento parecido a lo que son las interfaces en Java, y en general son utilizadas para generar restricciones para los tipos de las funciones que se declaran. Esto se ve de manera más fácil en el siguiente ejemplo:
+
+Preguntamos el tipo a la función de comparación por igualdad:
+
+\begin{lstlisting}
+ghci>:t (==)
+(==) :: forall a. Eq a => a -> a -> Bool
+\end{lstlisting}
+
+\textbf{(Eq a)} es una restricción en la declaración de tipos.
+\textbf{Eq} es una clase de tipo que indica que el tipo genérico \textit{a} es comparable por igualdad.
+
+\textbf{Ord}: Para tipos que poseen algún orden.
+
+\begin{lstlisting}
+ghci> :t (>)
+(>) :: forall a. Ord a => a -> a -> Bool
+\end{lstlisting}
+
+\textbf{(>)} recibe dos parámetros y devuelve \textit{True} si el primero es mayor al segundo. De lo contrario, devuelve \textit{False}.
+
+\textbf{Show}: Para tipos que pueden ser representados en forma de texto.
+
+\begin{lstlisting}
+ghci> show 3
+"3"
+ghci> show False
+"False"
+ghci> :t show
+show :: forall a. Show a => a -> String
+\end{lstlisting}
+
+\textbf{show} recibe elementos dentro de la clase de tipo \textbf{Show} y devuelve una cadena de caracteres.
+
+% section tipos (end)
