@@ -13,12 +13,10 @@ En terminos del lenguaje una mónada es un tipo parametrizado que es instancia
 de la clase \textit{Monad}. Su definición es la siguiente:
 
 \begin{lstlisting}
-
 class Monad m where
     return :: a -> m a
     (>>=) :: m a -> (a -> m b) -> m b
     (>>) :: m a -> m b -> m b
-
 \end{lstlisting}
 
 Podemos ver la mónada como un contenedor para un valor \textbf{a}. La función
@@ -29,11 +27,9 @@ resultado otra mónada (obviamente la función pasada tiene que tener el tipo
 adecuado). Se puede ver como funciona en el siguiente ejemplo:
 
 \begin{lstlisting}
-
 putStrLn "Como te llamas?"
 >>= (\_ -> getLine)
 >>= (\name -> putStrLn ("Hola, " ++ name ++ "!"))
-
 \end{lstlisting}
 
 El operador \lstinline$(>>=)$ se ocupa de tomar el valor del lado izquierdo
@@ -42,12 +38,10 @@ ejemplo de arriba se puede reescribir con la notación \lstinline$do$, que es un
 azucar sintáctico alrededor del operador \textit{bind}:
 
 \begin{lstlisting}
-
 do
    putStrLn "Como te llamas?"
    name <- getLine
    putStrLn ("Hola, " ++ name ++ "!")
-
 \end{lstlisting}
 
 Ese código puede parecer de un lenguaje imperativo, y de hecho lo es: otra
@@ -132,8 +126,12 @@ en esta tabla.
 % subsection m_nadas_comunes (end)
 
 
-\subsection{Mónada Maybe} % (fold)
-\label{sub:m_nada_maybe}
+\subsection{Manejo de errores} % (fold)
+\label{sub:manejo_de_errores}
+
+
+\subsubsection{Mónada Maybe} % (fold)
+\label{ssub:m_nada_maybe}
 
 Es una de las mónadas más utilizadas y es muy sencilla a la vez. La definición
 de esta Mónada es la siguiente:
@@ -209,11 +207,8 @@ Left "divBy: division by 0"
 % subsubsection _ither (end)
 
 
-% subsection m_nada_maybe (end)
-
-
-\subsection{Mónada Error} % (fold)
-\label{sub:m_nada_error}
+\subsubsection{Mónada Error} % (fold)
+\label{ssub:m_nada_error}
 
 La mónada Error es la forma que tiene Haskell de simular las
 \textit{excepciones}. Se logra de la siguiente forma: se encadenan
@@ -238,10 +233,9 @@ example >>= putStrLn        -- Imprime "Atrapo el error"
 
 Note que el tipo MonadError lleva 2 parametros, \textbf{e}, el tipo de error, y \textbf{m}, constructor que representa una mónada. Mas adelante en la definición se ve que el \textbf{throwError} y \textbf{catchError} son métodos de la clase MonadError, siendo los equivalentes a las estructuras familiares de otros lenguajes. Eso tiene la ventaja de poder definir su significado para cada mónada particular.
 
-
-
 % subsection m_nada_error (end)
 
+% subsection manejo_de_errores (end)
 
 \subsection{Mónada List} % (fold)
 \label{sub:m_nada_list}
@@ -279,7 +273,7 @@ entre 1 y 10, e y siendo 2, 3, 5 o 7. Este ejemplo es la notación larga y
 monádica de una comprensión de lista, podría ser escrita así:
 
 \begin{lstlisting}
-  foo = [x * y | x <- [1 .. 10], y <- [2, 3, 5, 7]]
+foo = [x * y | x <- [1 .. 10], y <- [2, 3, 5, 7]]
 \end{lstlisting}
 % subsection m_nada_list (end)
 
@@ -307,13 +301,13 @@ Con ella se puede hacer lo siguiente: dado un valor de estado, se produce un
 resultado y un nuevo valor de estado. Esta es su definición:
 
 \begin{lstlisting}
-  newtype State s a = State { runState :: (s -> (a,s)) }
+newtype State s a = State { runState :: (s -> (a,s)) }
 
-  instance Monad (State s) where
-    return x = State $ \s -> (x,s)
-    (State h) >>= f = State $ \s -> let (a, newState) = h s
-                                        (State g) = f a
-                                    in  g newState
+instance Monad (State s) where
+  return x = State $ \s -> (x,s)
+  (State h) >>= f = State $ \s -> let (a, newState) = h s
+                                      (State g) = f a
+                                  in  g newState
 \end{lstlisting}
 
 Como se ve en la declaración de tipo, State es solo una abstracción
@@ -327,25 +321,23 @@ no es lo más cómodo de usar. Con State la podemos definir de la siguiente
 forma:
 
 \begin{lstlisting}
-  type Stack = [Int]
+type Stack = [Int]
 
-  pop :: State Stack Int
-  pop = State $ \(x:xs) -> (x,xs)
+pop :: State Stack Int
+pop = State $ \(x:xs) -> (x,xs)
 
-  push :: Int -> State Stack ()
-  push a = State $ \xs -> ((),a:xs)
-
+push :: Int -> State Stack ()
+push a = State $ \xs -> ((),a:xs)
 \end{lstlisting}
 
 Un ejemplo de uso de la pila sería:
 
 \begin{lstlisting}
-  stackManip = do
-      push 3
-      a <- pop
-      pop
+stackManip = do
+    push 3
+    a <- pop
+    pop
 \end{lstlisting}
-
 
 La implementación de State en Control.Monad también es instancia de la clase
 MonadState que define 2 funciones muy útiles:
@@ -357,7 +349,83 @@ get = State $ \st -> (st, st)
 
 Las cuales nos permiten manejar el estado de una manera más sencilla.
 
-
 % subsection m_nada_state (end)
+
+\subsection{Mónada Reader} % (fold)
+\label{sub:m_nada_reader}
+
+Algunos problemas de programación requieren computaciones en un cierto entorno (como un set de variables), pero no requieren la generalidad de la mónada \textbf{State}. La mónada \textbf{Writer} permite aportarle a una computación un entorno. Esta es su definición de tipo y su instancia de mónada:
+
+\begin{lstlisting}
+newtype Reader r a = Reader {  runReader :: r -> a }
+
+instance Monad (Reader e) where
+    return a         = Reader $ \e -> a
+    (Reader r) >>= f = Reader $ \e -> runReader (f (r e)) e
+\end{lstlisting}
+
+En el siguiente ejemplo se puede ver facilmente su utilidad:
+
+\begin{lstlisting}
+import Control.Monad.Reader
+
+greeter :: Reader String String
+greeter = do
+    name <- ask
+    return ("Hola, " ++ name ++ "!")
+\end{lstlisting}
+
+\begin{lstlisting}
+ghci> runReader greeter "Jorge"
+"Hola, Jorge!"
+\end{lstlisting}
+
+Usamos la función \textbf{ask} que esta definida en la clase \textbf{MonadReader}. Esta es su definición y el como Reader implementa esa clase:
+
+\begin{lstlisting}
+class MonadReader e m | m -> e where
+    ask   :: m e
+    local :: (e -> e) -> m a -> m a
+
+instance MonadReader (Reader e) where
+  ask       = Reader id
+  local f c = Reader $ \e -> runReader c (f e)
+\end{lstlisting}
+
+Esta clase provee de funciones para que el uso de \textbf{Reader} sea más cómodo. \textbf{ask} recupera el entorno y \textbf{local} ejecuta la computación en el entorno modificado.
+
+% subsection m_nada_reader (end)
+
+\subsection{Mónada Writer} % (fold)
+\label{sub:m_nada_writer}
+
+La mónada \textbf{Writer} sirve para producir un stream de datos adicional a los valores computados.
+Es útil para generar un log sobre una ejecución.
+Esta es la definición del tipo \textbf{Writer}. Como con los ejemplos anteriores, nos permite redefinir su comportamiento:
+
+\begin{lstlisting}
+newtype Writer w a = Writer { runWriter :: (a, w) }
+\end{lstlisting}
+
+A continuación se puede ver un ejemplo sencillo de uso del Writer:
+
+\begin{lstlisting}
+import Control.Monad.Writer
+
+doubleWithLog :: Int -> Writer String Int
+doubleWithLog x = do
+        tell ("Acabo de duplicar " ++ (show x) ++ "!")
+        return (x * 2)
+\end{lstlisting}
+
+Si ejecutamos esta función, obtendremos lo siguiente:
+
+\begin{lstlisting}
+ghci> runWriter $ doubleWithLog 8
+(16, "Acabo de duplicar 8!")
+\end{lstlisting}
+
+% subsection m_nada_writer (end)
+
 
 % section m_nadas (end)
