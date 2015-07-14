@@ -8,9 +8,10 @@ La idea es muy sencilla: ejecutamos un bloque de acciones como una transacción,
 
 Cuando salimos de la transacción, puede ocurrir una de las dos posibilidades:
 
-1. Si ningún otro hilo modifica los mismos datos, todas las modificaciones ocurridas durante la transacción serán visibles para los otros threads.
-
-2. En el otro caso, todas las modificaciones hechas se descartan y nuestro bloque de acciones se vuelve a ejecutar automáticamente.
+\begin{itemize}
+    \item Si ningún otro hilo modifica los mismos datos, todas las modificaciones ocurridas durante la transacción serán visibles para los otros threads.
+    \item En el otro caso, todas las modificaciones hechas se descartan y nuestro bloque de acciones se vuelve a ejecutar automáticamente.
+\end{itemize}
 
 En el siguiente ejemplo sencillo de una cuenta bancaria podemos ver su funcionamiento:
 

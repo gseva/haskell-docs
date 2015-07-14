@@ -1,0 +1,117 @@
+\section{Sintaxis de funciones} % (fold)
+\label{sec:sintaxis_de_funciones}
+
+
+\subsection{Pattern Matching} % (fold)
+\label{sub:pattern_matching}
+
+
+A continuación se especificarán algunas construcciones sintácticas denominadas como ajuste de patrones (pattern matching).
+Una de las ventajas del ajuste de patrones es que se puede simplificar el código de manera que quede más elegante, mejorando la legibilidad.
+
+Un ejemplo simple es crear una función que al pasarle un número verifica si es el número que buscamos:
+
+\begin{lstlisting}
+lucky :: (Integral a) => a -> String
+lucky 7 = "*'¡El siete de la suerte!'*"
+lucky x = "*'Lo siento, ¡no es tu día de suerte!'*"
+\end{lstlisting}
+
+Los patrones son verificados de arriba a abajo, de manera que lucky primero verifica si se le pasó el 7 como parámetro a la función, de ser así devuelve una cadena, o de lo contrario devuelve otra.
+
+Otro ejemplo:
+
+\begin{lstlisting}
+sayMe :: (Integral a) => a -> String
+sayMe 1 = "Uno!"
+sayMe 2 = "Dos!"
+sayMe 3 = "Tres!"
+sayMe x = "No entre uno 1 y 3"
+\end{lstlisting}
+
+Otra vez se verifican los patrones de arriba a abajo. Esto es útil, por ejemplo, para no tener que anidar if, then, else en el cuerpo de la función
+
+Si no se cubre algún patrón, al intentar matchear un patrón nuevo, Haskell lanza un error:
+
+\begin{lstlisting}
+charName :: Char -> String
+charName 'a' = "Alejandro"
+charName 'b' = "Bernardo"
+charName 'c' = "Carlos"
+\end{lstlisting}
+
+Utilizando el intérprete veremos:
+
+\begin{lstlisting}
+ghci> charName 'a'
+"Alejandro"
+ghci> charName 'b'
+"Bernardo"
+ghci> charName 'c'
+"Carlos"
+ghci> charName 'z'
+:(2,1)-(4,23): Non-exhaustive patterns in function charName
+\end{lstlisting}
+
+El patrón \_ indica que no es de importancia y no se utilizará el valor:
+
+\begin{lstlisting}
+first :: (a, b, c) -> a
+first (x, _, _) = x
+
+second :: (a, b, c) -> b
+second (_, y, _) = y
+
+third :: (a, b, c) -> c
+third (_, _, z) = z
+\end{lstlisting}
+
+El patrón x:xs es utilizado para listas. Diferencian la cabeza (x) del resto de la lista (xs). La sintaxis de este patrón es definida por el caracter :, el cual divide a la cabeza del resto de la lista.
+
+Ejemplos:
+
+Para identificar la cabeza de una lista:
+
+\begin{lstlisting}
+head' :: [a] -> a
+head' [] = error "*'¡Hey, no puedes utilizar head con una lista vacía!'*"
+head' (x:_) = x
+\end{lstlisting}
+
+(El patrón [] representa una lista vacía)
+
+Para determinar la longitud de una lista:
+
+\begin{lstlisting}
+length' :: (Num b) => [a] -> b
+length' [] = 0
+length' (_:xs) = 1 + length' xs
+\end{lstlisting}
+
+% subsection pattern_matching (end)
+
+\subsection{Guardas} % (fold)
+\label{sub:guardas}
+
+Son expresiones que consisten básicamente en booleanos. Si se evalúa a True, se utiliza el cuerpo de la función correspondiente. Son otra buena alternativa para reemplazar un árbol de if, then, else.
+Se indican con barras verticales, normalmente tienen sangrías y están alineadas.
+
+Ejemplo:
+
+\begin{lstlisting}
+max' :: (Ord a) => a -> a -> a
+max' a b
+  | a > b = a
+  | otherwise = b
+\end{lstlisting}
+
+También pueden ser escritas en una sola línea:
+
+\begin{lstlisting}
+max' :: (Ord a) => a -> a -> a
+max' a b | a > b = a | otherwise = b
+\end{lstlisting}
+
+% subsection guardas (end)
+
+% section sintaxis_de_funciones (end)
