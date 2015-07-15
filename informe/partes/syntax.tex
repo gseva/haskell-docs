@@ -98,7 +98,7 @@ ghci> take 10 (cycle [1,2,3])
 [1,2,3,1,2,3,1,2,3,1]
 ghci> take 4 (repeat 'a')
 "aaaa"
-ghci> replicate "a" 4
+ghci> replicate 'a' 4
 "aaaa"
 \end{lstlisting}
 
@@ -275,7 +275,7 @@ add x y = x + y
 \end{lstlisting}
 
 \begin{lstlisting}
-gchi> 10  `add` 5
+gchi> 10 `add` 5
 15
 \end{lstlisting}
 
