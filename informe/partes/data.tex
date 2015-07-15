@@ -1,0 +1,98 @@
+\section{Creación de tipos} % (fold)
+\label{sec:creaci_n_de_tipos}
+
+Un tipo se define usando la palabra clave \textbf{data}, y luego el nombre del tipo y los constructores. Esto lo vemos en el siguiente ejemplo, donde se muestra cómo está definido el tipo \textbf{Bool} en la librería estándar:
+
+\begin{lstlisting}
+data Bool = False | True
+\end{lstlisting}
+
+\textbf{data} significa que se define un nuevo tipo de dato, la parte izquierda del \textbf{=} indica el nombre del tipo y en la parte derecha están los constructores. La barra \textbf{|} se puede leer como un operador or, por lo que se puede interpretar que Bool puede tomar los valores \textit{False} o \textit{True}.
+
+En el siguiente ejemplo definiremos una figura que puede ser sólo un círculo o un rectángulo:
+
+\begin{lstlisting}
+data Shape = Circle Float Float Float | Rectangle Float Float Float Float
+\end{lstlisting}
+
+Acá se está indicando que el tipo Shape puede tomar el valor de alguno de los constructores (Circle o Rectangle), los cuales son funciones que toman como parámetros los tipos indicados a la derecha del nombre del constructores (en el caso de Circle tres valores flotantes y en el caso de Rectangle serán cuatro). Esto significa que si le preguntamos el tipo a los constructores nos encontraremos con lo siguiente:
+
+\begin{lstlisting}
+ghci> :t Circle
+Circle :: Float -> Float -> Float -> Shape
+ghci> :t Rectangle
+Rectangle :: Float -> Float -> Float -> Float -> Shape
+\end{lstlisting}
+
+Entonces, si queremos crear una función que nos diga la superficie o área de una figura, se hará de la siguiente manera dependiendo de si es un círculo o rectángulo:
+
+\begin{lstlisting}
+surface :: Shape -> Float
+surface (Circle _ _ r) = pi * r ^ 2
+surface (Rectangle x1 y1 x2 y2) = (abs $ x2 - x1) * (abs $ y2 - y1)
+\end{lstlisting}
+
+Acá destacamos que surface no puede tomar un rectángulo o un círculo porque estos no son tipos, a diferencia de Shape.
+
+Entonces vemos en el intérprete cómo funciona esta función:
+
+\begin{lstlisting}
+ghci> surface $ Circle 10 20 10
+314.15927
+ghci> surface $ Rectangle 0 0 100 100
+10000.0
+\end{lstlisting}
+
+\subsection{Agregando instancia de clase} % (fold)
+\label{sub:agregando_instancia_de_clase}
+
+Si intentamos mostrar por pantalla \textbf{Circle 10 20 5} en una sesión de GHCi obtendremos un error.
+Esto sucede porque Haskell aún no sabe como representar nuestro tipo con una cadena. Cuando intentamos mostrar un valor por pantalla, primero Haskell ejecuta la función show para obtener la representación en texto de un dato y luego lo muestra en la terminal. Para hacer que el tipo Shape forme parte de la clase de tipo \textbf{Show}, añadimos \textbf{deriving (Show)} al final de la declaración de tipo, y automáticamente Haskell hace que ese tipo forme parte de la clase de tipo \textbf{Show}:
+
+\begin{lstlisting}
+data Shape = Circle Float Float Float | Rectangle Float Float Float Float deriving (Show)
+\end{lstlisting}
+
+Entonces, al imprimir por pantalla mostrará lo siguiente:
+
+\begin{lstlisting}
+ghci> Circle 10 20 5
+Circle 10.0 20.0 5.0
+ghci> Rectangle 50 230 60 90
+Rectangle 50.0 230.0 60.0 90.0
+\end{lstlisting}
+
+Los constructores de datos son funciones, por lo que pueden ser mapeados, se los puede aplicar parcialmente, etc.
+Por ejemplo, si queremos una lista de círculos concéntricos con diferente radio podemos escribir:
+
+\begin{lstlisting}
+ghci> map (Circle 10 20) [4,5,6,6]
+[Circle 10.0 20.0 4.0,Circle 10.0 20.0 5.0,Circle 10.0 20.0 6.0,Circle 10.0 20.0 6.0]
+\end{lstlisting}
+
+Otro ejemplo, es crear el tipo de dato figura con otro tipo de dato auxiliar  que represente un punto en el espacio:
+
+\begin{lstlisting}
+data Point = Point Float Float deriving (Show)
+data Shape = Circle Point Float | Rectangle Point Point deriving (Show)
+
+surface :: Shape -> Float
+surface (Circle _ r) = pi * r ^ 2
+surface (Rectangle (Point x1 y1) (Point x2 y2)) = (abs $ x2 - x1) * (abs $ y2 - y1)
+\end{lstlisting}
+
+Y si queremos exportarlo a un módulo, éste se declara en el encabezado de la siguiente manera:
+
+\begin{lstlisting}
+module Shapes
+( Point(..)
+, Shape(..)
+, surface
+) where
+
+-- ... *'declaración de los constructores y las funciones.'*
+\end{lstlisting}
+
+% subsection agregando_instancia_de_clase (end)
+
+% section creaci_n_de_tipos (end)
