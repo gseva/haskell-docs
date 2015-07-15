@@ -6,7 +6,6 @@
 Haskell permite definir funciones sin decir de que tipos son estas, esto, muy lejos de querer decir que Haskell no usa un tipado fuerte, es debido a que realiza inferencia de tipos.
 Uno puede escribir una función que sume dos números como:
 
-
 \begin{lstlisting}
   sumar  ::  (Num a) => a -> a -> a
   sumar x y = x + y
@@ -14,7 +13,6 @@ Uno puede escribir una función que sume dos números como:
 
 Donde la primer linea indica que las variables \textbf{a} son de la clase de tipos \textit{Num}.
 Si en GHCI usamos el comando \textbf{:t} para pedir el tipo de la funcion sumar tendremos:
-
 
 \begin{lstlisting}
   :t sumar

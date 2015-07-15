@@ -1,4 +1,4 @@
-\section{Sintaxis de funciones} % (fold)
+\section{Sintaxis básica} % (fold)
 \label{sec:sintaxis_de_funciones}
 
 Las funciones se definen de una manera similar a como son llamadas. El nombre de la función es seguido por los parámetros. Una definición se escribe agregando la definición de lo que hace la función con un \textbf{=} adelante.
@@ -21,6 +21,130 @@ Haskell posee de las sentencias \textit{if .. then .. else}. La diferencia de lo
 \begin{lstlisting}
 duplicarNumeroChico x = if x > 100 then x else x * 2
 \end{lstlisting}
+
+\subsection{Listas} % (fold)
+\label{sub:listas}
+
+Las listas son una estructura de datos muy usada. En Haskell las listas son homogeneas: almacena elementos del mismo tipo.
+
+\begin{lstlisting}
+ghci> let numbers = [4,8,15,16,23,42]
+ghci> numbers
+[4,8,15,16,23,42]
+\end{lstlisting}
+
+Las cadenas de texto tambíen son listas: \"hola\" es solo un azucar sintáctico de \lstinline$['H', 'o', 'l', 'a']$. Para concatenar listas en Haskell hacemos:
+
+\begin{lstlisting}
+ghci> [1,2,3,4] ++ [9,10,11,12]
+[1,2,3,4,9,10,11,12]
+ghci> "Hola" ++ " " ++ "mundo"
+"Hola mundo"
+\end{lstlisting}
+
+Hay que tener cuidado con el operador \textbf{++} ya que para concatenar tiene que recorrer el argumento izquierdo entero. Para concatenar algo al principio de la lista se usa el operador \textbf{:}, es instantáneo:
+
+\begin{lstlisting}
+ghci> 'H':"ola mundo"
+"Hola mundo"
+\end{lstlisting}
+
+Algunas funciones básicas para operar con los elmentos de las listas:
+
+\begin{lstlisting}
+ghci> head [1,2,3]
+1
+ghci> tail [1,2,3]
+[2,3]
+ghci> last [1,2,3]
+3
+ghci> reverse [1,2,3]
+[3,2,1]
+ghci> length [1,2,3]
+3
+ghci> take 2 [1,2,3]
+[1,2]
+ghci> drop 2 [1,2,3]
+[3]
+\end{lstlisting}
+
+\subsubsection{Rangos} % (fold)
+\label{ssub:rangos}
+
+¿Qué pasa si queremos todos los números entre 1 y 15? Podríamos escribirlos a mano, pero por suerte Haskell nos simplifica el trabajo con \textit{rangos}. Se utilizan de la siguiente manera:
+
+\begin{lstlisting}
+ghci> [1..15]
+[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+ghci> ['a'..'n']
+"abcdefghijklmn"
+ghci> [2,4..20]
+[2,4,6,8,10,12,14,16,18,20]
+\end{lstlisting}
+
+Como se puede ver, funciona con cualquier elemento que tenga alguna orden. En el último ejemplo le estamos especificando al rango un paso.
+
+Los rangos tambien se pueden utilizar para crear listas infinitas. Como ya mencionamos, Haskell es un lenguaje perezoso y solo va a evaluar los elementos de la lista infinita que sean necesarios.
+
+\begin{lstlisting}
+ghci> take 5 [1,2..]
+[1,2,3,4,5]
+\end{lstlisting}
+
+Algunas funciones útiles para la generación de listas infinitas:
+
+\begin{lstlisting}
+ghci> take 10 (cycle [1,2,3])
+[1,2,3,1,2,3,1,2,3,1]
+ghci> take 4 (repeat 'a')
+"aaaa"
+ghci> replicate "a" 4
+"aaaa"
+\end{lstlisting}
+
+\subsubsection{Listas por comprensión} % (fold)
+\label{ssub:listas_por_comprensi_n}
+
+Algo muy común en las matemáticas es definir conjuntos describiendo como son sus elementos, por ejemplo todos los \textit{x}, \textit{tales que}. En matemáticas podemos definir un conjunto de x naturales, pares y menores a 20 de la siguiente manera: \(S=\{x*2 | x \in N, x < 10\}\). En Haskell lo podriamos escribir como \lstinline$take 10 [2,4..]$, pero, ¿y si queremos algo más complejo? Para ello podemos usar las \textit{listas} por comprensión.
+
+\begin{lstlisting}
+ghci> [x*2 | x <- [1..10]]
+[2,4,6,8,10,12,14,16,18,20]
+\end{lstlisting}
+
+Podemos armar listas de comprensión más comlejas también:
+
+\begin{lstlisting}
+ghci> [ x | x <- [50..100], x `mod` 7 == 3]
+[52,59,66,73,80,87,94]
+ghci> let a = ["foo", "bar"]
+ghci> let b = ["123", "456"]
+ghci> [x ++ " " ++ y | x <- a, y <- b]
+["foo 123","foo 456","bar 123","bar 456"]
+\end{lstlisting}
+
+% subsubsection listas_por_comprensi_n (end)
+
+% subsubsection rangos (end)
+
+% subsection listas (end)
+
+\subsection{Tuplas} % (fold)
+\label{sub:tuplas}
+
+Tuplas son parecidas a las listas, pero con unas diferencias fundamentales. Las tuplas tienen un número de elementos definido, pero no necesariamente tienen que ser del mismo tipo. A continuación se pueden apreciar algunos ejemplos de uso de tuplas, con las funciones \textbf{fst} y \textbf{snd}, que devuelven el primer y el segundo elemento respectivamente.
+
+\begin{lstlisting}
+ghci> fst (1,80)
+1
+ghci> fst ("Hola", [1,2,3],50)
+"Hola"
+ghci> snd (1,80)
+80
+ghci> snd ("Hola", [1,2,3],50)
+[1,2,3]
+\end{lstlisting}
+% subsection tuplas (end)
 
 \subsection{Pattern Matching} % (fold)
 \label{sub:pattern_matching}
@@ -132,5 +256,29 @@ max' a b | a > b = a | otherwise = b
 \end{lstlisting}
 
 % subsection guardas (end)
+
+\subsection{Operadores Infijos} % (fold)
+\label{sub:operadores_infijos}
+
+Los operadores infijos también son funciones en Haskell. Por ejemplo la función de concatenación de listas se define de la siguiente forma:
+
+\begin{lstlisting}
+(++)         :: [a] -> [a] -> [a]
+[]     ++ ys =  ys
+(x:xs) ++ ys =  x : (xs++ys)
+\end{lstlisting}
+
+Las funciones comunes tambien pueden ser llamadas de forma infija.
+
+\begin{lstlisting}
+add x y = x + y
+\end{lstlisting}
+
+\begin{lstlisting}
+gchi> 10  `add` 5
+15
+\end{lstlisting}
+
+% subsection operadores_infijos (end)
 
 % section sintaxis_de_funciones (end)

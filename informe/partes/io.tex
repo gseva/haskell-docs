@@ -1,0 +1,237 @@
+\section{Entrada y Salida} % (fold)
+\label{sec:entrada_y_salida}
+
+\subsection{Acciones IO} % (fold)
+\label{sub:acciones_io}
+
+Para mostrar por pantalla se necesita llamar a una función que devuelva una acción IO.
+
+\begin{lstlisting}
+putStrLn "Hola mundo"
+\end{lstlisting}
+
+Si le preguntamos el tipo a la función putStrLn, veremos que recibe una cadena y devuelve una acción IO que no devuelve valores.
+
+\begin{lstlisting}
+ghci> :t putStrLn
+putStrLn :: IO ()
+\end{lstlisting}
+
+Ahora bien, si lo que queremos es pedir una cadena de caracteres utilizando la función getLine, sabremos que getLine utiliza otra acción IO que esta vez devuelve un valor de tipo String, el cual es resultado de lo que se ingresó por teclado en la ejecución del programa:
+
+\begin{lstlisting}
+:t getLine
+getLine :: IO String
+\end{lstlisting}
+
+Lo que falta ahora es saber cómo introducir acciones IO en el código de un programa Haskell.
+Las acciones IO son código impuro, ya que produce efectos laterales en contraposición a la programación pura.
+En Haskell debe separarse lo que es código puro de código impuro. Por esto al tener varias acciones IO (dos o más), deben hacerse dentro de un mismo bloque do:
+
+\begin{lstlisting}
+main = do
+    putStrLn "Ingrese su nombre"
+    nombre <- getLine
+    putStrLn ("Hola " ++ nombre)
+\end{lstlisting}
+
+Por lo tanto, podemos ver que la siguiente acción es inválida:
+
+\begin{lstlisting}
+ghci> "Hola, mi nombre es" ++ getLine
+Couldn't match expected type `String' with actual type `IO String'
+In the second argument of `(++)', namely `getLine'
+In the expression: "Hola, mi nombre es" ++ getLine
+\end{lstlisting}
+
+\subsubsection{Ejemplos de acciones IO} % (fold)
+\label{ssub:ejemplos_de_acciones_io}
+
+\textbf{putStr} toma una cadena y la imprime en pantalla sin el salto de línea.
+
+\begin{lstlisting}
+mostrarString = do
+  putStr "Hola, "
+  putStr "programo "
+  putStr "en "
+  putStrLn "Haskell!"
+\end{lstlisting}
+
+\begin{lstlisting}
+ghci> mostrarString
+Hola, programo en Haskell!
+\end{lstlisting}
+
+\textbf{print} muestra en pantalla miembros de la clase show.
+
+\begin{lstlisting}
+ghci> print True
+True
+ghci> print 2
+2
+ghci> print "Hola"
+"Hola"
+ghci> print 3.2
+3.2
+ghci> print [3,4,3]
+[3,4,3]
+\end{lstlisting}
+
+\textbf{when} se encuentra en el módulo \textit{Control.Monad}.
+Toma un valor booleano y una acción IO de forma que si el valor booleano es \textit{True}, devolverá
+la misma acción que se le suministre. Sin embargo, si es falso, devolverá una acción \textbf{return ()}, acción que no hace absolutamente nada.
+
+\begin{lstlisting}
+import Control.Monad
+
+main = do
+  c <- getChar
+  when (c /= ' ') $ do
+    putChar c
+    main
+\end{lstlisting}
+
+También existe la función unless que es exactamete igual a when solo que devuleve la acción original cuando ecuentra \textit{False} en lugar de \textit{True}.
+
+sequence toma una lista de acciones IO y devuevle una acción que realizará todas esas acciones una detrás de otra. El resultado contenido en la acción IO será una lista con todos los resultados de todas las acciones IO que fueron ejecutadas. Su tipo es \lstinline$sequence :: [IO a] ->`IO [a]$. Hacer esto:
+
+\begin{lstlisting}
+main = do
+  a <- getLine
+  b <- getLine
+  c <- getLine
+  print [a,b,c]
+\end{lstlisting}
+
+Produce el mismo resultado que:
+
+\begin{lstlisting}
+main = do
+  rs <- sequence [getLine, getLine, getLine]
+  print rs
+\end{lstlisting}
+
+% subsubsection ejemplos_de_acciones_io (end)
+
+\subsection{Aleatoriedad} % (fold)
+\label{sub:aleatoriedad}
+
+La función \textbf{random} toma un generador, el cual es creado por la función \textbf{mkStdGen} y devuelve una dupla que contiene un número real y otro valor generador.
+Si invoco dos veces a la función \textbf{random} con el mismo valor generador, devolverá los mismos valores. Ejemplo:
+
+\begin{lstlisting}
+ghci> random (mkStdGen 100)
+(-3650871090684229393,693699796 2103410263)
+ghci>random (mkStdGen 100)
+(-3650871090684229393,693699796 2103410263)
+ghci>random (mkStdGen 2432434)
+(708227736329069275,242756692 2103410263)
+\end{lstlisting}
+
+También podemos modificar el tipo de valor que queremos que nos devuelva:
+
+\begin{lstlisting}
+ghci>random (mkStdGen 949488) :: (Float, StdGen)
+(0.8241101,1597344447 1655838864)
+ghci>random (mkStdGen 949488) :: (Bool, StdGen)
+(False,1485632275 40692)
+\end{lstlisting}
+
+% subsection aleatoriedad (end)
+
+
+\subsection{Excepciones} % (fold)
+\label{sub:excepciones}
+
+% subsection excepciones (end)
+
+Tanto el código puro como el código impuro puede lanzar excepciones, pero estas excepciones siempre son capturadas en la parte I/O del código. Esto sucede porque no se sabe si algo será
+evaluado en el código puro ya que se evalúa de forma perezosa y no tiene definido un orden de ejecución concreto, mientras que las partes de E/S sí lo tienen.
+
+En esta sección solo se verá como utilizar las excepciones de E/S.
+Las excepciones de E/S ocurren cuando algo va mal a la hora de comunicamos con el mundo exterior. Por ejemplo, podemos tratar de abrir un fichero y luego puede ocurrir que ese fichero ha sido eliminado o algo parecido.
+
+El siguiente programa abre un fichero que ha sido obtenido como parámetro y e indica cuántas líneas contiene:
+
+\begin{lstlisting}
+import System.Environment
+import System.IO
+
+main = do (fileName:_) <- getArgs
+  contents <- readFile fileName
+  putStrLn $ "The file has " ++ show (length (lines contents)) ++ " lines!"
+\end{lstlisting}
+
+Vemos qué sucede si se le da el nombre de un fichero que no existe:
+
+\begin{lstlisting}
+$ runhaskell linecount.hs i_dont_exist.txt
+linecount.hs: i_dont_exist.txt: openFile: does not exist (No such file or directory)
+\end{lstlisting}
+
+Se obtuvo un error que indica que el fichero no existe. A continuación se ve cómo capturar el error y modificar el mensaje a gusto del programador, utilizando la función \textbf{doesFileExist} de \textbf{System.Directory}:
+
+\begin{lstlisting}
+import System.Environment
+import System.IO
+import System.Directory
+
+main = do (fileName:_) <- getArgs
+  fileExists <- doesFileExist fileName
+  if fileExists
+    then do contents <- readFile fileName
+      putStrLn $ "The file has " ++ show (length (lines contents)) ++ " lines!"
+    else do putStrLn "The file doesn't exist!"
+\end{lstlisting}
+
+Se hizo \lstinline$fileExists <- doesFileExist fileName$ porque \textbf{doesFileExist} tiene como declaración de tipo \lstinline$doesFileExist :: FilePath -> IO Bool$, lo que significa que devuelve una acción IO que tiene como resultado un valor booleano que indica si el fichero existe o no. No se puede utilizar \textbf{doesFileExist} directamente en una expresión \textit{if}.
+Otra solución sería utilizando excepciones. Un fichero que no existe es una excepción que se lanza desde I/O, así que capturarla en I/O es totalmente aceptable.
+
+Para esto se utiliza la sentencia \textbf{catch}.
+
+\begin{lstlisting}
+import System.Environment
+import System.IO
+import System.IO.Error
+
+main = catch toTry handler
+
+toTry :: IO ()
+toTry = do (fileName:_) <- getArgs
+  contents <- readFile fileName
+  putStrLn $ "The file has " ++ show (length (lines contents)) ++ " lines!"
+
+handler :: IOError -> IO ()
+handler e
+    | isDoesNotExistError e = putStrLn "The file doesn't exist!"
+    | otherwise = ioError e
+\end{lstlisting}
+
+\textbf{toTry} es una acción de E/S que intentaremos ejecutar y handler es la función que toma un \textbf{IOError} y devuelve una acción que será ejecutada en caso de que suceda una excepción.
+
+Existen varios predicados que trabajan con \textbf{IOError} que se pueden utilizar junto las guardas, ya que, si una guarda no se evalua a \textit{True}, se seguirá evaluando la siguiente guarda. Los predicados que trabajan con \textbf{IOError} son:
+
+\begin{itemize}
+  \item isAlreadyExistsError
+  \item isDoesNotExistError
+  \item isAlreadyInUseError
+  \item isFullError
+  \item isEOFError
+  \item isIllegalOperation
+  \item isPermissionError
+  \item isUserError
+\end{itemize}
+
+Por ejemplo, podríamos tener un manipulador como el siguiente:
+
+\begin{lstlisting}
+handler :: IOError -> IO ()
+handler e
+  | isDoesNotExistError e = putStrLn "The file doesn't exist!"
+  | isFullError e = freeSomeSpace
+  | isIllegalOperation e = notifyCops
+  | otherwise = ioError e
+\end{lstlisting}
+
+
+% section entrada_y_salida (end)
